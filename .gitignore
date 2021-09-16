@@ -129,5 +129,9 @@ dmypy.json
 .pyre/
 
 # Email account and password infomation(其实是乱取的扩展名233)
-    .email.acc.pss.json
+.email.acc.pss.json
 sender.email.acc.pss.json
+
+# GWT previous cache content(还是乱取的233)
+.previous.cache.txt
+GWT.previous.cache.txt
