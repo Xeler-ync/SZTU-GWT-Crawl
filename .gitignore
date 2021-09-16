@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Email account and password infomation(其实是乱取的扩展名233)
+    .email.acc.pss.json
