@@ -62,7 +62,7 @@ def getGWTPageHTML(page,totalPage):
 
 def getTotalPageFromFirstPageHTML(html):
     if html=='':
-        html=getGWTPageHTML()
+        html=getGWTPageHTML(1,0)
     totalPageFinder='上页</span><span class="p_no_d">1</span><span class="p_no"><a href="\?totalpage=([0-9]+)\&PAGENUM=2\&urltype=tree.TreeTempUrl\&wbtreeid=[0-9]+"'
     totalPage=re.findall(totalPageFinder,html,re.S)
     return totalPage[0]
@@ -70,12 +70,13 @@ def getTotalPageFromFirstPageHTML(html):
 def getGWTPageInfo(page,html,totalPage):
     if page==0:
         return [['No Page 0']*5]
-    if totalPage==0:
-        totalPage=getTotalPageFromFirstPageHTML(html)
     if html=='':
         html=getGWTPageHTML(1,totalPage)
+    if totalPage==0:
+        totalPage=getTotalPageFromFirstPageHTML(html)
     html=html.replace('\n','')
     html=html.replace('\r','')
+    html=html.replace('<img src="images/fujian.png">','1')#优化返回的内容
     if page>int(totalPage):
         return [['Page too big, max is '+str(totalPage)]*5]
     listFinder='style="font-size: 14px;">(.*?)</a></div><div class="pull-left width04 txt-elise text-left" style="width:54%;"><a href="info/[0-9]+/([0-9]+).htm" title=".*?" target="_blank" style="">(.*?)</a></div><div class="pull-left width05"  style="width:5%;height:32px;">(.*?)</div><div class="pull-right width06"  style="width:11%;">([0-9-]+)</div></li>'
