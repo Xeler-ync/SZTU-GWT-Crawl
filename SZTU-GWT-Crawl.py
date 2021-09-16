@@ -70,10 +70,10 @@ def getTotalPageFromFirstPageHTML(html):
 def getGWTPageInfo(page,html,totalPage):
     if page==0:
         return [['No Page 0']*5]
-    if html=='':
-        html=getGWTPageHTML()
     if totalPage==0:
         totalPage=getTotalPageFromFirstPageHTML(html)
+    if html=='':
+        html=getGWTPageHTML(1,totalPage)
     html=html.replace('\n','')
     html=html.replace('\r','')
     if page>int(totalPage):
@@ -84,5 +84,5 @@ def getGWTPageInfo(page,html,totalPage):
 
 # sentSTMPMessage('Fuck content to my fucking mail box again.')
 
-# (announcementInfoList,totalPage)=getGWTPageInfo(1,'',0)
-# print(announcementInfoList[0])
+(announcementInfoList,totalPage)=getGWTPageInfo(1,'',0)
+print(announcementInfoList)
