@@ -1,0 +1,3 @@
+'target="_self">(.*?)</a></div><div class="pull-left width03 txt-elise"[ ]+style="width:15%;cursor: pointer;"><a href=".*?" target="_self"[ ]+style="font-size: 14px;">(.*?)</a></div><div class="pull-left width04 txt-elise text-left" style="width:54%;"><a href="info/[0-9]+]/([0-9]+).htm" title="(.*?)" target="_blank" style="">.*?</a></div><div class="pull-left width05"  style="width:5%;height:32px;">([<img src="images/fujian.png">]{0,1})</div><div class="pull-right width06"[ ]+style="width:11%;">([0123456789-])</div></li>'
+
+#本来想把同一个通知的信息一起匹配的没搞成qwq
