@@ -13,11 +13,13 @@ headers={
     'Referer' : 'http://nbw.sztu.edu.cn/',
     'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36'
 }
+startTime=''
+pauseHours=1
 
 
 def createEmailContentFromNewAnnouncement(newAnnouncement):
     content='There is(are) '+str(len(newAnnouncement))+' new announcement(s) now!\n'
-    content+='The message was generated at '+datetime.datetime.now().strftime( '%y-%m-%d_%H:%M:%S' )+'\n'
+    content+='The message was generated at '+startTime+'\n'
     content+='\n'
     for i in range(len(newAnnouncement)):
         content+='\n'
@@ -32,7 +34,7 @@ def createEmailContentFromNewAnnouncement(newAnnouncement):
     content+='The message was generated at '+datetime.datetime.now().strftime( '%y-%m-%d_%H:%M:%S' )+'\n'
     content+='本程序所提供的信息，仅供参考之用。所有数据来自深圳技术大学内部网，版权归深圳技术大学及相关发布人所有。'
     content+='完整的免责声明见程序发布页或向邮件发送者索取'
-    return
+    return content
 
 def separateNewAnnouncement(announcementInfoList):
     newAnnouncement=[]
@@ -59,7 +61,7 @@ def saveRecentGWTCode(announcementInfoList):
 
 def writeGWTPreviousCache(numList):
     with open(file=os.getcwd()+'/GWT.previous.cache.txt',mode='w+',encoding='utf-8') as gpc:
-        gpc.writelines(numList+'\n')
+        gpc.writelines(numList)
     return
 
 def sentGWTMessage(content):
@@ -132,13 +134,14 @@ def getGWTPageInfo(page,html,totalPage):
     announcementInfoList=re.findall(listFinder,html,re.S)#source, index, title, hasAttachment, date
     return announcementInfoList, totalPage
 
-
-# sentSTMPMessage('Fuck content to my fucking mail box again.')
-
-
-
-(announcementInfoList,totalPage)=getGWTPageInfo(1,'',0)
-markRepetedAnnouncement(announcementInfoList)
-saveRecentGWTCode(announcementInfoList)
-
-print(announcementInfoList)
+if __name__=='__main__':
+    while True:
+        startTime=datetime.datetime.now().strftime('%yy-%m-%d_%H:%M:%S')
+        (announcementInfoList,totalPage)=getGWTPageInfo(1,'',0)
+        markRepetedAnnouncement(announcementInfoList)
+        saveRecentGWTCode(announcementInfoList)
+        newAnnouncementList=separateNewAnnouncement(announcementInfoList)
+        emailContent=createEmailContentFromNewAnnouncement(newAnnouncementList)
+        sentGWTMessage(emailContent)
+        print('Sleep from '+datetime.datetime.now().strftime('%yy-%m-%d_%H:%M:%S')+' to '(datetime.datetime.now()+datetime.timedelta(hours=pauseHours)).strftime('%yy-%m-%d_%H:%M:%S'))
+        time.sleep(pauseHours*3600)
