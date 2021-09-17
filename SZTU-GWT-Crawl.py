@@ -32,6 +32,8 @@ def createEmailContentFromNewAnnouncement(newAnnouncement):
             content+='Attachment: Flase\n'
         else:
             content+='Attachment: True\n'
+    content+='\n'
+    content+='\n'
     content+='The message was sent at '+datetime.datetime.now().strftime('%y-%m-%d_%H:%M:%S')+'\n'
     content+='本程序所提供的信息，仅供参考之用。所有数据来自深圳技术大学内部网，版权归深圳技术大学及相关发布人所有。\n'
     content+='完整的免责声明见程序发布页或向邮件发送者索取'
