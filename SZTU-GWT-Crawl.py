@@ -5,6 +5,8 @@ import os
 import re
 import requests
 import json
+import time
+import datetime
 from email.mime.text import MIMEText
 from email.header import Header
 headers={
@@ -13,7 +15,54 @@ headers={
 }
 
 
-def sentSTMPMessage(content):
+def createEmailContentFromNewAnnouncement(newAnnouncement):
+    content='There is(are) '+str(len(newAnnouncement))+' new announcement(s) now!\n'
+    content+='The message was generated at '+datetime.datetime.now().strftime( '%y-%m-%d_%H:%M:%S' )+'\n'
+    content+='\n'
+    for i in range(len(newAnnouncement)):
+        content+='\n'
+        content+='From: '+newAnnouncement[i][0]+'\n'
+        content+='Date: '+newAnnouncement[i][4]+'\n'
+        content+='Tittle: '+newAnnouncement[i][2]+'\n'
+        content+='Link: '+'http://nbw.sztu.edu.cn/info/'+newAnnouncement[i][1]+'\n'
+        if newAnnouncement[i][3].find('1')==-1:
+            content+='Attachment: Flase\n'
+        else:
+            content+='Attachment: True\n'
+    content+='The message was generated at '+datetime.datetime.now().strftime( '%y-%m-%d_%H:%M:%S' )+'\n'
+    content+='本程序所提供的信息，仅供参考之用。所有数据来自深圳技术大学内部网，版权归深圳技术大学及相关发布人所有。'
+    content+='完整的免责声明见程序发布页或向邮件发送者索取'
+    return
+
+def separateNewAnnouncement(announcementInfoList):
+    newAnnouncement=[]
+    for i in range(len(announcementInfoList)):
+        if announcementInfoList[i][3].find('r')==-1:
+            newAnnouncement.append(announcementInfoList[i])
+    return newAnnouncement
+
+def markRepetedAnnouncement(announcementInfoList):
+    with open(file=os.getcwd()+'/GWT.previous.cache.txt',mode='r',encoding='utf-8') as gpc:
+        previousCodeList=gpc.readlines()
+        for i in range(len(announcementInfoList)):
+            for j in range(len(previousCodeList)):
+                if announcementInfoList[i][1]==previousCodeList[j]:
+                    announcementInfoList[i][3]+='r'
+    return
+
+def saveRecentGWTCode(announcementInfoList):
+    codeList=[]
+    for i in range(len(announcementInfoList)):
+        codeList.append(announcementInfoList[i][1])
+    writeGWTPreviousCache(codeList)
+    return
+
+def writeGWTPreviousCache(numList):
+    with open(file=os.getcwd()+'/GWT.previous.cache.txt',mode='w+',encoding='utf-8') as gpc:
+        gpc.writelines(numList+'\n')
+    return
+
+def sentGWTMessage(content):
     jsonSendingData=openInfosFile()
     #set sever
     emailSender=smtplib.SMTP_SSL(jsonSendingData["smtpserver"],jsonSendingData["smtpport"])
@@ -79,11 +128,17 @@ def getGWTPageInfo(page,html,totalPage):
     html=html.replace('<img src="images/fujian.png">','1')#优化返回的内容
     if page>int(totalPage):
         return [['Page too big, max is '+str(totalPage)]*5]
-    listFinder='style="font-size: 14px;">(.*?)</a></div><div class="pull-left width04 txt-elise text-left" style="width:54%;"><a href="info/[0-9]+/([0-9]+).htm" title=".*?" target="_blank" style="">(.*?)</a></div><div class="pull-left width05"  style="width:5%;height:32px;">(.*?)</div><div class="pull-right width06"  style="width:11%;">([0-9-]+)</div></li>'
+    listFinder='style="font-size: 14px;">(.*?)</a></div><div class="pull-left width04 txt-elise text-left" style="width:54%;"><a href="info/([0-9]+/[0-9]+).htm" title=".*?" target="_blank" style="">(.*?)</a></div><div class="pull-left width05"  style="width:5%;height:32px;">(.*?)</div><div class="pull-right width06"  style="width:11%;">([0-9-]+)</div></li>'
     announcementInfoList=re.findall(listFinder,html,re.S)#source, index, title, hasAttachment, date
     return announcementInfoList, totalPage
 
+
 # sentSTMPMessage('Fuck content to my fucking mail box again.')
 
+
+
 (announcementInfoList,totalPage)=getGWTPageInfo(1,'',0)
+markRepetedAnnouncement(announcementInfoList)
+saveRecentGWTCode(announcementInfoList)
+
 print(announcementInfoList)
