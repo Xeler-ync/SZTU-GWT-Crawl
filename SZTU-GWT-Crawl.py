@@ -103,6 +103,9 @@ def openInfosFile():#if no, creat one
             sea.writelines('    "smtpport": 465\n')
             sea.writelines('    "title": ""\n')
             sea.writelines('}')
+            print('Please correctly fill in the sender.email.acc.pss.json first.')
+            input('Press Enter to quit')
+            exit()
 
 def getGWTPageHTML(page,totalPage):
     if page==1 and totalPage==0:
