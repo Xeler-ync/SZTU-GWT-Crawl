@@ -8,6 +8,7 @@ import json
 import time
 import datetime
 from email.mime.text import MIMEText
+from email.utils import formataddr
 from email.header import Header
 headers={
     'Referer' : 'http://nbw.sztu.edu.cn/',
@@ -55,7 +56,7 @@ def markRepetedAnnouncement(announcementInfoList):
 def saveRecentGWTCode(announcementInfoList):
     codeList=[]
     for i in range(len(announcementInfoList)):
-        codeList.append(announcementInfoList[i][1])
+        codeList.append(announcementInfoList[i][1]+'\n')
     writeGWTPreviousCache(codeList)
     return
 
@@ -67,18 +68,19 @@ def writeGWTPreviousCache(numList):
 def sentGWTMessage(content):
     jsonSendingData=openInfosFile()
     #set sever
-    emailSender=smtplib.SMTP_SSL(jsonSendingData["smtpserver"],jsonSendingData["smtpport"])
-    emailSender.login(jsonSendingData["fromaddress"],jsonSendingData["qqcode"])
-    message = MIMEText(content, 'plain', 'utf-8')   #define content
-    message['From'] = Header(jsonSendingData["fromname"], 'utf-8')   #sender
+    emailSever=smtplib.SMTP_SSL(jsonSendingData["smtpserver"],jsonSendingData["smtpport"])
+    emailSever.login(jsonSendingData["fromaddress"],jsonSendingData["qqcode"])
+    message = MIMEText(content, 'plain', 'utf-8')   #define message
+    message['from']=formataddr([jsonSendingData["fromname"],jsonSendingData["fromaddress"]])#sender
     message['Subject'] = Header(jsonSendingData["title"], 'utf-8')  #email title
     for i in range(len(jsonSendingData["toname"])):
-        message['To'] = Header(jsonSendingData["toname"][i], 'utf-8')   #recever
+        message["To"]=formataddr([jsonSendingData["toname"][i],jsonSendingData["toaddress"][i]])#recever
         try:
-            emailSender.sendmail(jsonSendingData["fromaddress"], jsonSendingData["toaddress"][i], message.as_string())
+            emailSever.sendmail(jsonSendingData["fromaddress"], jsonSendingData["toaddress"][i], message.as_string())
+            print ('Email sent successfully to '+jsonSendingData["toname"][i]+' '+jsonSendingData["toaddress"][i])
         except Exception as error:
             print ('Email sent failed --' + str(error))
-        print ('Email sent successfully to '+jsonSendingData["toname"][i]+' '+jsonSendingData["toaddress"][i])
+    emailSever.quit()
 
 def openInfosFile():#if no, creat one
     try:
@@ -143,5 +145,5 @@ if __name__=='__main__':
         newAnnouncementList=separateNewAnnouncement(announcementInfoList)
         emailContent=createEmailContentFromNewAnnouncement(newAnnouncementList)
         sentGWTMessage(emailContent)
-        print('Sleep from '+datetime.datetime.now().strftime('%yy-%m-%d_%H:%M:%S')+' to '(datetime.datetime.now()+datetime.timedelta(hours=pauseHours)).strftime('%yy-%m-%d_%H:%M:%S'))
+        #print('Sleep from '+datetime.datetime.now().strftime('%yy-%m-%d_%H:%M:%S')+' to '(datetime.datetime.now()+datetime.timedelta(hours=pauseHours)).strftime('%yy-%m-%d_%H:%M:%S'))
         time.sleep(pauseHours*3600)
