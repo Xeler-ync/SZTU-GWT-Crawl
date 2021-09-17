@@ -67,14 +67,17 @@ def writeGWTPreviousCache(numList):
         gpc.writelines(numList)
     return
 
-def sentGWTMessage(content):
+def sentGWTMessage(content,newAnnonucementNum):
     jsonSendingData=openInfosFile()
     #set sever
     emailSever=smtplib.SMTP_SSL(jsonSendingData["smtpserver"],jsonSendingData["smtpport"])
     emailSever.login(jsonSendingData["fromaddress"],jsonSendingData["qqcode"])
     message = MIMEText(content, 'plain', 'utf-8')   #define message
     message['from']=formataddr([jsonSendingData["fromname"],jsonSendingData["fromaddress"]])#sender
-    message['Subject'] = Header(jsonSendingData["title"], 'utf-8')  #email title
+    if newAnnonucementNum==0:
+        message['Subject'] = Header('No new GWT announcement', 'utf-8')  #email title
+    else:
+        message['Subject'] = Header(jsonSendingData["title"], 'utf-8')  #email title
     for i in range(len(jsonSendingData["toname"])):
         message["To"]=formataddr([jsonSendingData["toname"][i],jsonSendingData["toaddress"][i]])#recever
         try:
@@ -153,6 +156,6 @@ if __name__=='__main__':
         newAnnouncementList=separateNewAnnouncement(announcementInfoList)
         emailContent=createEmailContentFromNewAnnouncement(newAnnouncementList)
         print(str(len(newAnnouncementList))+' new announcement(s)')
-        sentGWTMessage(emailContent)
+        sentGWTMessage(emailContent,len(newAnnouncementList))
         print('Sleep from '+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')+' to '+(datetime.datetime.now()+datetime.timedelta(hours=pauseHours)).strftime('%Y-%m-%d_%H:%M:%S'))
         time.sleep(pauseHours*3600)
