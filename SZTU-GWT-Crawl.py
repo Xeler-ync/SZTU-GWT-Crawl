@@ -32,8 +32,8 @@ def createEmailContentFromNewAnnouncement(newAnnouncement):
             content+='Attachment: Flase\n'
         else:
             content+='Attachment: True\n'
-    content+='The message was generated at '+datetime.datetime.now().strftime( '%y-%m-%d_%H:%M:%S' )+'\n'
-    content+='本程序所提供的信息，仅供参考之用。所有数据来自深圳技术大学内部网，版权归深圳技术大学及相关发布人所有。'
+    content+='The message was sent at '+datetime.datetime.now().strftime('%y-%m-%d_%H:%M:%S')+'\n'
+    content+='本程序所提供的信息，仅供参考之用。所有数据来自深圳技术大学内部网，版权归深圳技术大学及相关发布人所有。\n'
     content+='完整的免责声明见程序发布页或向邮件发送者索取'
     return content
 
@@ -49,7 +49,7 @@ def markRepetedAnnouncement(announcementInfoList):
         previousCodeList=gpc.readlines()
         for i in range(len(announcementInfoList)):
             for j in range(len(previousCodeList)):
-                if announcementInfoList[i][1]==previousCodeList[j]:
+                if (announcementInfoList[i][1]+'\n')==previousCodeList[j]:
                     announcementInfoList[i][3]+='r'
     return
 
@@ -132,18 +132,22 @@ def getGWTPageInfo(page,html,totalPage):
     html=html.replace('<img src="images/fujian.png">','1')#优化返回的内容
     if page>int(totalPage):
         return [['Page too big, max is '+str(totalPage)]*5]
-    listFinder='style="font-size: 14px;">(.*?)</a></div><div class="pull-left width04 txt-elise text-left" style="width:54%;"><a href="info/([0-9]+/[0-9]+).htm" title=".*?" target="_blank" style="">(.*?)</a></div><div class="pull-left width05"  style="width:5%;height:32px;">(.*?)</div><div class="pull-right width06"  style="width:11%;">([0-9-]+)</div></li>'
-    announcementInfoList=re.findall(listFinder,html,re.S)#source, index, title, hasAttachment, date
+    listFinder='style="font-size: 14px;">(.*?)</a></div><div class="pull-left width04 txt-elise text-left" style="width:54%;"><a href="info/([0-9]+/[0-9]+).htm" title=".*?" target="_blank" style=".*?">(.*?)</a></div><div class="pull-left width05"  style="width:5%;height:32px;">(.*?)</div><div class="pull-right width06"  style="width:11%;">([0-9-]+)</div></li>'
+    announcementInfoTuple=re.findall(listFinder,html,re.S)#source, index, title, hasAttachment, date
+    announcementInfoList=list(announcementInfoTuple)
+    for i in range(len(announcementInfoList)):
+        announcementInfoList[i]=list(announcementInfoList[i])
     return announcementInfoList, totalPage
 
 if __name__=='__main__':
     while True:
-        startTime=datetime.datetime.now().strftime('%yy-%m-%d_%H:%M:%S')
+        startTime=datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
         (announcementInfoList,totalPage)=getGWTPageInfo(1,'',0)
         markRepetedAnnouncement(announcementInfoList)
         saveRecentGWTCode(announcementInfoList)
         newAnnouncementList=separateNewAnnouncement(announcementInfoList)
         emailContent=createEmailContentFromNewAnnouncement(newAnnouncementList)
+        print(str(len(newAnnouncementList))+' new announcement(s)')
         sentGWTMessage(emailContent)
-        #print('Sleep from '+datetime.datetime.now().strftime('%yy-%m-%d_%H:%M:%S')+' to '(datetime.datetime.now()+datetime.timedelta(hours=pauseHours)).strftime('%yy-%m-%d_%H:%M:%S'))
+        print('Sleep from '+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')+' to '+(datetime.datetime.now()+datetime.timedelta(hours=pauseHours)).strftime('%Y-%m-%d_%H:%M:%S'))
         time.sleep(pauseHours*3600)
