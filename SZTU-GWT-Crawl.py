@@ -26,7 +26,7 @@ def createEmailContentFromNewAnnouncement(newAnnouncement):
         content+='From: '+newAnnouncement[i][0]+'\n'
         content+='Date: '+newAnnouncement[i][4]+'\n'
         content+='Tittle: '+newAnnouncement[i][2]+'\n'
-        content+='Link: '+'http://nbw.sztu.edu.cn/info/'+newAnnouncement[i][1]+'\n'
+        content+='Link: '+'http://nbw.sztu.edu.cn/info/'+newAnnouncement[i][1]+'.htm\n'
         if newAnnouncement[i][3].find('1')==-1:
             content+='Attachment: Flase\n'
         else:
