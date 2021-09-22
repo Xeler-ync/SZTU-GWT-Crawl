@@ -80,6 +80,9 @@ def sentGWTMessage(content,newAnnonucementNum):
     else:
         message['Subject'] = Header(jsonSendingData["title"], 'utf-8')  #email title
     for i in range(len(jsonSendingData["toname"])):
+        if len(newAnnouncementList)==0 and jsonSendingData['toisadmin'][i]==False:
+            print('No new announcement, ignore '+jsonSendingData["toname"][i]+' '+jsonSendingData["toaddress"][i])
+            continue
         message["To"]=formataddr([jsonSendingData["toname"][i],jsonSendingData["toaddress"][i]])#recever
         try:
             emailSever.sendmail(jsonSendingData["fromaddress"], jsonSendingData["toaddress"][i], message.as_string())
@@ -103,6 +106,9 @@ def openInfosFile():#if no, creat one
             sea.writelines('    ],\n')
             sea.writelines('    "toname": [\n')
             sea.writelines('        ""\n')
+            sea.writelines('    ],\n')
+            sea.writelines('    "toisadmin": [\n')
+            sea.writelines('        \n')
             sea.writelines('    ],\n')
             sea.writelines('    "qqcode": "",\n')
             sea.writelines('    "smtpserver": "smtp.qq.com",\n')
