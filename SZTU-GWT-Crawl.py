@@ -79,14 +79,15 @@ def sentGWTMessage(content,newAnnonucementNum):
         message['Subject'] = Header('No new GWT announcement', 'utf-8')  #email title
     else:
         message['Subject'] = Header(jsonSendingData["title"], 'utf-8')  #email title
-    for i in range(len(jsonSendingData["toname"])):
-        if len(newAnnouncementList)==0 and jsonSendingData['toisadmin'][i]==False:
-            print('No new announcement, ignore '+jsonSendingData["toname"][i]+' '+jsonSendingData["toaddress"][i])
+    # for i in range(len(jsonSendingData["toname"])):
+    for i in range(len(jsonSendingData["to"])):
+        if len(newAnnouncementList)==0 and jsonSendingData['to'][i]["isadmin"]==False:
+            print('No new announcement, ignore '+jsonSendingData["to"][i]["name"]+' '+jsonSendingData["to"][i]["address"])
             continue
-        message["To"]=formataddr([jsonSendingData["toname"][i],jsonSendingData["toaddress"][i]])#recever
+        message["To"]=formataddr([jsonSendingData["to"][i]["name"]+' '+jsonSendingData["to"][i]["address"]])#recever
         try:
-            emailSever.sendmail(jsonSendingData["fromaddress"], jsonSendingData["toaddress"][i], message.as_string())
-            print ('Email sent successfully to '+jsonSendingData["toname"][i]+' '+jsonSendingData["toaddress"][i])
+            emailSever.sendmail(jsonSendingData["fromaddress"], jsonSendingData["to"][i]["address"], message.as_string())
+            print ('Email sent successfully to '+jsonSendingData["toname"][i]+' '+jsonSendingData["to"][i]["address"])
         except Exception as error:
             print ('Email sent failed --' + str(error))
     emailSever.quit()
@@ -101,15 +102,11 @@ def openInfosFile():#if no, creat one
             sea.writelines('{')
             sea.writelines('    "fromaddress": "",\n')
             sea.writelines('    "fromname": "",\n')
-            sea.writelines('    "toaddress": [\n')
-            sea.writelines('        ""\n')
-            sea.writelines('    ],\n')
-            sea.writelines('    "toname": [\n')
-            sea.writelines('        ""\n')
-            sea.writelines('    ],\n')
-            sea.writelines('    "toisadmin": [\n')
-            sea.writelines('        \n')
-            sea.writelines('    ],\n')
+            sea.writelines('    "to": [\n')
+            sea.writelines('        {\n')
+            sea.writelines('            "name" : "",\n')
+            sea.writelines('            "address" : "",\n')
+            sea.writelines('            "isadmin" : ,\n')
             sea.writelines('    "qqcode": "",\n')
             sea.writelines('    "smtpserver": "smtp.qq.com",\n')
             sea.writelines('    "smtpport": 465\n')
