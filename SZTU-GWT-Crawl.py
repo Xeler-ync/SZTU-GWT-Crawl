@@ -151,6 +151,31 @@ def getGWTPageInfo(page,html,totalPage):
         announcementInfoList[i]=list(announcementInfoList[i])
     return announcementInfoList, totalPage
 
+def saveHTMLpage(content,name):
+    with open(os.getcwd+'/html-download/'+name+'.html') as file:
+        file.write(content)
+    return
+
+def getHTMLPage(url):
+    html=requests.get(url).content.decode('utf-8')
+    return html
+
+def downloadHTMLPage(newAnnouncement):
+    for i in range(len(newAnnouncement)):
+        htmlIndex=''
+        for j in range(len(newAnnouncement[i][1])):
+            if newAnnouncement[i][1][-j]!='/':
+                htmlIndex=newAnnouncement[i][1][-j]+htmlIndex
+            else:
+                break
+        fileName=htmlIndex+'_'+newAnnouncement[i][4]+'_'+newAnnouncement[i][2]
+        html=getHTMLPage('http://nbw.sztu.edu.cn/info/'+newAnnouncement[i][1]+'.htm')
+        attachmentlink=re.findall('')#未完成
+        if len(attachmentlink)>0:
+            fileName+='_hasAttachment'
+        #download_Attachment
+        saveHTMLpage(html,fileName)
+
 if __name__=='__main__':
     while True:
         startTime=datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
@@ -160,6 +185,8 @@ if __name__=='__main__':
         newAnnouncementList=separateNewAnnouncement(announcementInfoList)
         emailContent=createEmailContentFromNewAnnouncement(newAnnouncementList)
         print(str(len(newAnnouncementList))+' new announcement(s)')
+        downloadHTMLPage(newAnnouncementList)
+        #sent_With_HTML_Source_And_Attachment
         sentGWTMessage(emailContent,len(newAnnouncementList))
         print('Sleep from '+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')+' to '+(datetime.datetime.now()+datetime.timedelta(hours=pauseHours)).strftime('%Y-%m-%d_%H:%M:%S'))
         time.sleep(pauseHours*3600)
