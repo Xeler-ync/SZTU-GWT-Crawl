@@ -68,7 +68,7 @@ def writeGWTPreviousCache(numList):
         gpc.writelines(numList)
     return
 
-def sentGWTMessage(content,newAnnonucementNum):
+def sentGWTMessage(content,newAnnonucementNum,allHTMLName,allAttachmentName):
     jsonSendingData=openInfosFile()
     #set sever
     emailSever=smtplib.SMTP_SSL(jsonSendingData["smtpserver"],jsonSendingData["smtpport"])
@@ -79,12 +79,22 @@ def sentGWTMessage(content,newAnnonucementNum):
         message['Subject'] = Header('No new GWT announcement', 'utf-8')  #email title
     else:
         message['Subject'] = Header(jsonSendingData["title"], 'utf-8')  #email title
+    for i in range(len(allHTMLName)):
+        HTMLFile=MIMEText(open(os.getcwd()+'/html-download/'+allHTMLName[i]+'.html',mode='r',encoding='utf-8').read(), 'base64','utf-8')
+        HTMLFile["Content-Type"]='application/octet-stream'
+        HTMLFile["Content-Disposition"] = 'attachment; filename="'+allHTMLName[i]+'"'
+        message.attach(HTMLFile)
+    for i in range(len(allAttachmentName)):
+        attachmentFile=MIMEText(open(os.getcwd()+'/'+allAttachmentName[i]).read(), 'base64', 'utf-8')
+        attachmentFile["Content-Type"]='application/octet-stream'
+        attachmentFile["Content-Disposition"] = 'attachment; filename="'+allAttachmentName[i]+'"'
+        message.attach(attachmentFile)
     # for i in range(len(jsonSendingData["toname"])):
     for i in range(len(jsonSendingData["to"])):
         if len(newAnnouncementList)==0 and jsonSendingData['to'][i]["isadmin"]==False:
             print('No new announcement, ignore '+jsonSendingData["to"][i]["name"]+' '+jsonSendingData["to"][i]["address"])
             continue
-        message["To"]=formataddr([jsonSendingData["to"][i]["name"]+' '+jsonSendingData["to"][i]["address"]])#recever
+        message["To"]=formataddr([jsonSendingData["to"][i]["name"],jsonSendingData["to"][i]["address"]])#recever
         try:
             emailSever.sendmail(jsonSendingData["fromaddress"], jsonSendingData["to"][i]["address"], message.as_string())
             print ('Email sent successfully to '+jsonSendingData["toname"][i]+' '+jsonSendingData["to"][i]["address"])
@@ -152,7 +162,7 @@ def getGWTPageInfo(page,html,totalPage):
     return announcementInfoList, totalPage
 
 def saveHTMLpage(content,name):
-    with open(os.getcwd+'/html-download/'+name+'.html',mode='w+',encoding='utf-8') as file:
+    with open(os.getcwd()+'/html-download/'+name+'.html',mode='w+',encoding='utf-8') as file:
         file.write(content)
     return
 
@@ -161,32 +171,46 @@ def getHTMLPage(url):
     return html
 
 def downloadWebFile(newAnnouncement):
+    allFileName=[]
+    allAttachmentName=[]
     for i in range(len(newAnnouncement)):
         htmlIndex=''
         for j in range(len(newAnnouncement[i][1])):
-            if newAnnouncement[i][1][-j]!='/':
-                htmlIndex=newAnnouncement[i][1][-j]+htmlIndex
+            if newAnnouncement[i][1][-j-1]!='/':
+                htmlIndex=newAnnouncement[i][1][-j-1]+htmlIndex
             else:
                 break
         fileName=htmlIndex+'_'+newAnnouncement[i][4]+'_'+newAnnouncement[i][2]
         html=getHTMLPage('http://nbw.sztu.edu.cn/info/'+newAnnouncement[i][1]+'.htm')
         finder='<li>附件【<a href="(.*?)" target="_blank">(.*?)</a>】已下载<span id="nattach6572259"><script language="javascript">getClickTimes(([0-9]+),({0-9}+),"wbnewsfile","attach")</script></span>次</li>'
-        attachmentLink,attachmentName=re.findall(finder,html,re.S)#未完成
+        try:
+            attachmentLink,attachmentName=re.findall(finder,html,re.S)
+        except:
+            attachmentLink=[]
+            attachmentName=[]
         if len(attachmentLink)>0:
+            for j in range(len(attachmentName)):
+                attachmentName[j]=htmlIndex+'_'+attachmentName[j]
             fileName+='_hasAttachment'
-            for i in range(len(attachmentLink)):
-                downloadAttachment(attachmentLink[i],attachmentName[i])
+            for k in range(len(attachmentLink)):
+                downloadAttachment(attachmentLink[k],attachmentName[k])
         saveHTMLpage(html,fileName)
-        return fileName,attachmentName
+        allFileName.append(fileName)
+        allAttachmentName.append(attachmentName)
+    return allFileName,allAttachmentName
 
 def downloadAttachment(URL,fileName):
     r=requests.get(url=URL,stream=True)
-    with open(os.getcwd+'/html-download/'+fileName,mode='wb+') as att:
+    with open(os.getcwd()+'/html-download/'+fileName,mode='wb+') as att:
         for chunk in r.iter_content(chunk_size=1024):
             if chunk:
                 att.write(chunk)
 
 if __name__=='__main__':
+    try:
+        os.mkdir(os.getcwd()+'/html-download')
+    except:
+        pass
     while True:
         startTime=datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
         (announcementInfoList,totalPage)=getGWTPageInfo(1,'',0)
@@ -195,8 +219,8 @@ if __name__=='__main__':
         newAnnouncementList=separateNewAnnouncement(announcementInfoList)
         emailContent=createEmailContentFromNewAnnouncement(newAnnouncementList)
         print(str(len(newAnnouncementList))+' new announcement(s)')
-        downloadWebFile(newAnnouncementList)#here!
+        allHTMLName,allAttachmentName=downloadWebFile(newAnnouncementList)
         #sent_With_HTML_Source_And_Attachment
-        sentGWTMessage(emailContent,len(newAnnouncementList))
+        sentGWTMessage(emailContent,len(newAnnouncementList),allHTMLName,allAttachmentName)
         print('Sleep from '+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')+' to '+(datetime.datetime.now()+datetime.timedelta(hours=pauseHours)).strftime('%Y-%m-%d_%H:%M:%S'))
         time.sleep(pauseHours*3600)
