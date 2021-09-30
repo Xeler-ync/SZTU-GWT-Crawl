@@ -160,7 +160,7 @@ def getHTMLPage(url):
     html=requests.get(url).content.decode('utf-8')
     return html
 
-def downloadHTMLPage(newAnnouncement):
+def downloadWebFile(newAnnouncement):
     for i in range(len(newAnnouncement)):
         htmlIndex=''
         for j in range(len(newAnnouncement[i][1])):
@@ -171,11 +171,20 @@ def downloadHTMLPage(newAnnouncement):
         fileName=htmlIndex+'_'+newAnnouncement[i][4]+'_'+newAnnouncement[i][2]
         html=getHTMLPage('http://nbw.sztu.edu.cn/info/'+newAnnouncement[i][1]+'.htm')
         finder='<li>附件【<a href="(.*?)" target="_blank">(.*?)</a>】已下载<span id="nattach6572259"><script language="javascript">getClickTimes(([0-9]+),({0-9}+),"wbnewsfile","attach")</script></span>次</li>'
-        attachmentLink=re.findall(finder,html,re.S)#未完成
+        attachmentLink,attachmentName=re.findall(finder,html,re.S)#未完成
         if len(attachmentLink)>0:
             fileName+='_hasAttachment'
-        #download_Attachment
+            for i in range(len(attachmentLink)):
+                downloadAttachment(attachmentLink[i],attachmentName[i])
         saveHTMLpage(html,fileName)
+        return fileName,attachmentName
+
+def downloadAttachment(URL,fileName):
+    r=requests.get(url=URL,stream=True)
+    with open(os.getcwd+'/html-download/'+fileName,mode='wb+') as att:
+        for chunk in r.iter_content(chunk_size=1024):
+            if chunk:
+                att.write(chunk)
 
 if __name__=='__main__':
     while True:
@@ -186,7 +195,7 @@ if __name__=='__main__':
         newAnnouncementList=separateNewAnnouncement(announcementInfoList)
         emailContent=createEmailContentFromNewAnnouncement(newAnnouncementList)
         print(str(len(newAnnouncementList))+' new announcement(s)')
-        downloadHTMLPage(newAnnouncementList)
+        downloadWebFile(newAnnouncementList)#here!
         #sent_With_HTML_Source_And_Attachment
         sentGWTMessage(emailContent,len(newAnnouncementList))
         print('Sleep from '+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')+' to '+(datetime.datetime.now()+datetime.timedelta(hours=pauseHours)).strftime('%Y-%m-%d_%H:%M:%S'))
