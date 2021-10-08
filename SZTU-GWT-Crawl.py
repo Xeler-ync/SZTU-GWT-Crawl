@@ -152,7 +152,7 @@ def getGWTPageInfo(page,html,totalPage):
     return announcementInfoList, totalPage
 
 def saveHTMLpage(content,name):
-    with open(os.getcwd+'/html-download/'+name+'.html',mode='w+',encoding='utf-8') as file:
+    with open(os.getcwd()+'/html-download/'+name+'.html',mode='w+',encoding='utf-8') as file:
         file.write(content)
     return
 
@@ -171,7 +171,11 @@ def downloadWebFile(newAnnouncement):
         fileName=htmlIndex+'_'+newAnnouncement[i][4]+'_'+newAnnouncement[i][2]
         html=getHTMLPage('http://nbw.sztu.edu.cn/info/'+newAnnouncement[i][1]+'.htm')
         finder='<li>附件【<a href="(.*?)" target="_blank">(.*?)</a>】已下载<span id="nattach6572259"><script language="javascript">getClickTimes(([0-9]+),({0-9}+),"wbnewsfile","attach")</script></span>次</li>'
-        attachmentLink,attachmentName=re.findall(finder,html,re.S)#未完成
+        try:
+            attachmentLink,attachmentName=re.findall(finder,html,re.S)#未完成
+        except:
+            attachmentLink=[]
+            attachmentName=[]
         if len(attachmentLink)>0:
             fileName+='_hasAttachment'
             for i in range(len(attachmentLink)):
