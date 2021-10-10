@@ -8,6 +8,8 @@ import json
 import time
 import datetime
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.header import Header
 from email.utils import formataddr
 from email.header import Header
 headers={
@@ -73,7 +75,7 @@ def sentGWTMessage(content,newAnnonucementNum,allHTMLName,allAttachmentName):
     #set sever
     emailSever=smtplib.SMTP_SSL(jsonSendingData["smtpserver"],jsonSendingData["smtpport"])
     emailSever.login(jsonSendingData["fromaddress"],jsonSendingData["qqcode"])
-    message = MIMEText(content, 'plain', 'utf-8')   #define message
+    message = MIMEMultipart(content, 'plain', 'utf-8')   #define message
     message['from']=formataddr([jsonSendingData["fromname"],jsonSendingData["fromaddress"]])#sender
     if newAnnonucementNum==0:
         message['Subject'] = Header('No new GWT announcement', 'utf-8')  #email title
@@ -85,7 +87,7 @@ def sentGWTMessage(content,newAnnonucementNum,allHTMLName,allAttachmentName):
         HTMLFile["Content-Disposition"] = 'attachment; filename="'+allHTMLName[i]+'"'
         message.attach(HTMLFile)
     for i in range(len(allAttachmentName)):
-        attachmentFile=MIMEText(open(os.getcwd()+'/'+allAttachmentName[i]).read(), 'base64', 'utf-8')
+        attachmentFile=MIMEMultipart(open(os.getcwd()+'/'+allAttachmentName[i][1]).read(), 'base64', 'utf-8')
         attachmentFile["Content-Type"]='application/octet-stream'
         attachmentFile["Content-Disposition"] = 'attachment; filename="'+allAttachmentName[i]+'"'
         message.attach(attachmentFile)
@@ -183,20 +185,21 @@ def downloadWebFile(newAnnouncement):
         fileName=htmlIndex+'_'+newAnnouncement[i][4]+'_'+newAnnouncement[i][2]
         html=getHTMLPage('http://nbw.sztu.edu.cn/info/'+newAnnouncement[i][1]+'.htm')
         finder='<li>附件【<a href="(.*?)" target="_blank">(.*?)</a>】已下载<span id="nattach6572259"><script language="javascript">getClickTimes(([0-9]+),({0-9}+),"wbnewsfile","attach")</script></span>次</li>'
+        attachmentName=[]
+        attachmentLink=[]
         try:
-            attachmentLink,attachmentName=re.findall(finder,html,re.S)#未完成
+            attachmentLink,attachmentName=re.findall(finder,html,re.S)
         except:
-            attachmentLink=[]
-            attachmentName=[]
+            pass
         if len(attachmentLink)>0:
             for j in range(len(attachmentName)):
                 attachmentName[j]=htmlIndex+'_'+attachmentName[j]
             fileName+='_hasAttachment'
             for k in range(len(attachmentLink)):
                 downloadAttachment(attachmentLink[k],attachmentName[k])
+            allAttachmentName.append(attachmentName)
         saveHTMLpage(html,fileName)
         allFileName.append(fileName)
-        allAttachmentName.append(attachmentName)
     return allFileName,allAttachmentName
 
 def downloadAttachment(URL,fileName):
