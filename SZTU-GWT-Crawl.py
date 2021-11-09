@@ -5,6 +5,7 @@ import os
 import re
 import requests
 import json
+import jsonpath
 import time
 import datetime
 from email.mime.text import MIMEText
@@ -62,7 +63,7 @@ def saveRecentGWTCode(announcementInfoList):
     codeList=[]
     for i in range(len(announcementInfoList)):
         codeList.append(announcementInfoList[i][1]+'\n')
-    writeGWTPreviousCache(codeList)
+    # writeGWTPreviousCache(codeList)
     return
 
 def writeGWTPreviousCache(numList):
@@ -75,15 +76,17 @@ def sentGWTMessage(content,newAnnonucementNum,allHTMLName,allAttachmentName):
     #set sever
     emailSever=smtplib.SMTP_SSL(jsonSendingData["smtpserver"],jsonSendingData["smtpport"])
     emailSever.login(jsonSendingData["fromaddress"],jsonSendingData["qqcode"])
-    message = MIMEMultipart(content, 'plain', 'utf-8')   #define message
+    message = MIMEMultipart()   #define message
+    message.attach(MIMEText(content, 'plain', 'utf-8'))
     message['from']=formataddr([jsonSendingData["fromname"],jsonSendingData["fromaddress"]])#sender
     if newAnnonucementNum==0:
         message['Subject'] = Header('No new GWT announcement', 'utf-8')  #email title
     else:
         message['Subject'] = Header(jsonSendingData["title"], 'utf-8')  #email title
     for i in range(len(allHTMLName)):
-        HTMLFile=MIMEText(open(os.getcwd()+'/html-download/'+allHTMLName[i]+'.html',mode='r',encoding='utf-8').read(), 'base64','utf-8')
-        HTMLFile["Content-Type"]='application/octet-stream'
+        # HTMLFile=MIMEText(open(os.getcwd()+'/html-download/'+allHTMLName[i]+'.html',mode='r',encoding='utf-8').read(), 'base64','utf-8')
+        HTMLFile=MIMEText(open(os.getcwd()+'/html-download/{}.html'.format(allHTMLName[i]),mode='r',encoding='utf-8').read(),'utf-8')
+        # HTMLFile["Content-Type"]='application/octet-stream'
         HTMLFile["Content-Disposition"] = 'attachment; filename="'+allHTMLName[i]+'"'
         message.attach(HTMLFile)
     for i in range(len(allAttachmentName)):
@@ -98,10 +101,10 @@ def sentGWTMessage(content,newAnnonucementNum,allHTMLName,allAttachmentName):
             continue
         message["To"]=formataddr([jsonSendingData["to"][i]["name"],jsonSendingData["to"][i]["address"]])#recever
         try:
-            emailSever.sendmail(jsonSendingData["fromaddress"], jsonSendingData["to"][i]["address"], message.as_string())
-            print ('Email sent successfully to '+jsonSendingData["toname"][i]+' '+jsonSendingData["to"][i]["address"])
+            emailSever.sendmail(from_addr=jsonSendingData["fromaddress"], to_addrs=[jsonSendingData["to"][i]["address"]], msg=message.as_string())
+            print ('Email sent successfully to '+jsonSendingData["to"][i]['name']+' '+jsonSendingData["to"][i]["address"])
         except Exception as error:
-            print ('Email sent failed --' + str(error))
+            print ('Email sent failed --> ' + str(error))
     emailSever.quit()
 
 def openInfosFile():#if no, creat one
