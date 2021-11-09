@@ -135,3 +135,5 @@ sender.email.acc.pss.json
 # GWT previous cache content(还是乱取的233)
 .previous.cache.txt
 GWT.previous.cache.txt
+sender.email.acc.pss_old.json
+html-download/

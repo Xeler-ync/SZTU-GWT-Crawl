@@ -59,7 +59,7 @@ def markRepetedAnnouncement(announcementInfoList):
                     announcementInfoList[i][3]+='r'
     return
 
-def saveRecentGWTCode(announcementInfoList):
+def saveRecentGWTCode(announcementInfoList): #debug here!!!
     codeList=[]
     for i in range(len(announcementInfoList)):
         codeList.append(announcementInfoList[i][1]+'\n')
