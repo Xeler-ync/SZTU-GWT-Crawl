@@ -192,6 +192,7 @@ def downloadWebFile(newAnnouncement):
         if attachmentDivsNum>0:
             for i in range(0,attachmentDivsNum):
                 attachmentName.append(html.xpath(xpathFinder+'/a')[i].text)
+                attachmentLink.append(html.xpath(xpathFinder+'/a/@href')[i])
             print(attachmentName)
             for j in range(len(attachmentName)):
                 attachmentName[j]=htmlIndex+'_'+attachmentName[j]
@@ -204,7 +205,7 @@ def downloadWebFile(newAnnouncement):
     return allFileName,allAttachmentName
 
 def downloadAttachment(URL,fileName):
-    r=requests.get(url=URL,stream=True)
+    r=requests.get(url='http://nbw.sztu.edu.cn/'+URL,stream=True)
     with open(os.getcwd()+'/html-download/'+fileName,mode='wb+') as att:
         for chunk in r.iter_content(chunk_size=1024):
             if chunk:
