@@ -6,10 +6,12 @@ import re
 import requests
 import json
 import jsonpath
+from lxml import etree
 import time
 import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
 from email.header import Header
 from email.utils import formataddr
 from email.header import Header
@@ -84,17 +86,13 @@ def sentGWTMessage(content,newAnnonucementNum,allHTMLName,allAttachmentName):
     else:
         message['Subject'] = Header(jsonSendingData["title"], 'utf-8')  #email title
     for i in range(len(allHTMLName)):
-        # HTMLFile=MIMEText(open(os.getcwd()+'/html-download/'+allHTMLName[i]+'.html',mode='r',encoding='utf-8').read(), 'base64','utf-8')
-        HTMLFile=MIMEText(open(os.getcwd()+'/html-download/{}.html'.format(allHTMLName[i]),mode='r',encoding='utf-8').read(),'utf-8')
-        # HTMLFile["Content-Type"]='application/octet-stream'
-        HTMLFile["Content-Disposition"] = 'attachment; filename="'+allHTMLName[i]+'"'
+        HTMLFile=MIMEApplication(open(os.getcwd()+'/html-download/{}.htm'.format(allHTMLName[i]),mode='r',encoding='utf-8').read())
+        HTMLFile.add_header('Content-Disposition', 'attachment', filename=allHTMLName[i]+'.htm')
         message.attach(HTMLFile)
     for i in range(len(allAttachmentName)):
-        attachmentFile=MIMEMultipart(open(os.getcwd()+'/'+allAttachmentName[i][1]).read(), 'base64', 'utf-8')
-        attachmentFile["Content-Type"]='application/octet-stream'
-        attachmentFile["Content-Disposition"] = 'attachment; filename="'+allAttachmentName[i]+'"'
+        attachmentFile=MIMEApplication(open(os.getcwd()+'/'+allAttachmentName[i][1]).read())
+        attachmentFile.add_header('Content-Disposition', 'attachment', allAttachmentName=allAttachmentName[i])
         message.attach(attachmentFile)
-    # for i in range(len(jsonSendingData["toname"])):
     for i in range(len(jsonSendingData["to"])):
         if len(newAnnouncementList)==0 and jsonSendingData['to'][i]["isadmin"]==False:
             print('No new announcement, ignore '+jsonSendingData["to"][i]["name"]+' '+jsonSendingData["to"][i]["address"])
@@ -167,7 +165,7 @@ def getGWTPageInfo(page,html,totalPage):
     return announcementInfoList, totalPage
 
 def saveHTMLpage(content,name):
-    with open(os.getcwd()+'/html-download/'+name+'.html',mode='w+',encoding='utf-8') as file:
+    with open(os.getcwd()+'/html-download/'+name+'.htm',mode='w+',encoding='utf-8') as file:
         file.write(content)
     return
 
@@ -186,22 +184,22 @@ def downloadWebFile(newAnnouncement):
             else:
                 break
         fileName=htmlIndex+'_'+newAnnouncement[i][4]+'_'+newAnnouncement[i][2]
-        html=getHTMLPage('http://nbw.sztu.edu.cn/info/'+newAnnouncement[i][1]+'.htm')
-        finder='<li>附件【<a href="(.*?)" target="_blank">(.*?)</a>】已下载<span id="nattach6572259"><script language="javascript">getClickTimes(([0-9]+),({0-9}+),"wbnewsfile","attach")</script></span>次</li>'
+        html=etree.HTML(getHTMLPage('http://nbw.sztu.edu.cn/info/'+newAnnouncement[i][1]+'.htm'))
+        xpathFinder='//html/body/div/form/div/ul/li'
         attachmentName=[]
         attachmentLink=[]
-        try:
-            attachmentLink,attachmentName=re.findall(finder,html,re.S)
-        except:
-            pass
-        if len(attachmentLink)>0:
+        attachmentDivsNum=len(html.xpath(xpathFinder))
+        if attachmentDivsNum>0:
+            for i in range(0,attachmentDivsNum):
+                attachmentName.append(html.xpath(xpathFinder+'/a')[i].text)
+            print(attachmentName)
             for j in range(len(attachmentName)):
                 attachmentName[j]=htmlIndex+'_'+attachmentName[j]
             fileName+='_hasAttachment'
             for k in range(len(attachmentLink)):
                 downloadAttachment(attachmentLink[k],attachmentName[k])
             allAttachmentName.append(attachmentName)
-        saveHTMLpage(html,fileName)
+        saveHTMLpage(etree.tostring(html).decode('utf-8'),fileName)
         allFileName.append(fileName)
     return allFileName,allAttachmentName
 
