@@ -61,11 +61,11 @@ def markRepetedAnnouncement(announcementInfoList):
                     announcementInfoList[i][3]+='r'
     return
 
-def saveRecentGWTCode(announcementInfoList): #debug here!!!
+def saveRecentGWTCode(announcementInfoList):
     codeList=[]
     for i in range(len(announcementInfoList)):
         codeList.append(announcementInfoList[i][1]+'\n')
-    # writeGWTPreviousCache(codeList)
+    writeGWTPreviousCache(codeList)
     return
 
 def writeGWTPreviousCache(numList):
@@ -137,7 +137,6 @@ def getGWTPageHTML(page,totalPage):
     else:
         url='http://nbw.sztu.edu.cn/list.jsp?totalpage='+str(totalPage)+'&PAGENUM='+str(page)+'&urltype=tree.TreeTempUrl&wbtreeid=1029'
         html=requests.get(url=url,headers=headers).content.decode('utf-8')
-    #http://nbw.sztu.edu.cn/list.jsp?totalpage=236&PAGENUM=2&urltype=tree.TreeTempUrl&wbtreeid=1029
     return html
 
 def getTotalPageFromFirstPageHTML(html):
@@ -188,22 +187,18 @@ def downloadWebFile(newAnnouncement):
         fileName=htmlIndex+'_'+newAnnouncement[i][4]+'_'+newAnnouncement[i][2]
         html=etree.HTML(getHTMLPage('http://nbw.sztu.edu.cn/info/'+newAnnouncement[i][1]+'.htm'))
         xpathFinder='//html/body/div/form/div/ul/li'
-        # allAttachmentName=[]
         attachmentLink=[]
         attachmentDivsNum=len(html.xpath(xpathFinder))
         if attachmentDivsNum>0:
             for l in range(0,attachmentDivsNum):
                 allAttachmentName.append(html.xpath(xpathFinder+'/a')[l].text)
                 attachmentLink.append(html.xpath(xpathFinder+'/a/@href')[l])
-            # print(allAttachmentName)
-            # for j in range(len(allAttachmentName)-1,len(allAttachmentName)-1-attachmentDivsNum,-1):
             for j in range(-1,-1-attachmentDivsNum,-1):
                 allAttachmentName[j]=htmlIndex+'_'+allAttachmentName[j]
             fileName+='_hasAttachment'
             for k in range(-1,-1-attachmentDivsNum,-1):
                 headers['Referer'] = 'http://nbw.sztu.edu.cn/info/'+newAnnouncement[i][1]+'.htm'
                 downloadAttachment(attachmentLink[k],allAttachmentName[k])
-            # allAttachmentName.append(allAttachmentName)
         saveHTMLpage(etree.tostring(html).decode('utf-8'),fileName)
         allFileName.append(fileName)
     headers['Referer'] = 'http://nbw.sztu.edu.cn/'
@@ -215,7 +210,6 @@ def downloadAttachment(URL,fileName):
         for chunk in r.iter_content(chunk_size=1024):
             if chunk:
                 att.write(chunk)
-    # print(r.headers)
 
 if __name__=='__main__':
     try:
@@ -231,7 +225,6 @@ if __name__=='__main__':
         emailContent=createEmailContentFromNewAnnouncement(newAnnouncementList)
         print(str(len(newAnnouncementList))+' new announcement(s)')
         allHTMLName,allAttachmentName=downloadWebFile(newAnnouncementList)
-        #sent_With_HTML_Source_And_Attachment
         sentGWTMessage(emailContent,len(newAnnouncementList),allHTMLName,allAttachmentName)
         print('Sleep from '+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')+' to '+(datetime.datetime.now()+datetime.timedelta(hours=pauseHours)).strftime('%Y-%m-%d_%H:%M:%S'))
         time.sleep(pauseHours*3600)
