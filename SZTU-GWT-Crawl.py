@@ -74,6 +74,8 @@ def writeGWTPreviousCache(numList):
     return
 
 def sentGWTMessage(content,newAnnonucementNum,allHTMLName,allAttachmentName):
+    allHTMLName.sort()
+    allAttachmentName.sort()
     jsonSendingData=openInfosFile()
     #set sever
     emailSever=smtplib.SMTP_SSL(jsonSendingData["smtpserver"],jsonSendingData["smtpport"])
@@ -90,8 +92,8 @@ def sentGWTMessage(content,newAnnonucementNum,allHTMLName,allAttachmentName):
         HTMLFile.add_header('Content-Disposition', 'attachment', filename=allHTMLName[i]+'.htm')
         message.attach(HTMLFile)
     for i in range(len(allAttachmentName)):
-        attachmentFile=MIMEApplication(open(os.getcwd()+'/'+allAttachmentName[i][1]).read())
-        attachmentFile.add_header('Content-Disposition', 'attachment', allAttachmentName=allAttachmentName[i])
+        attachmentFile=MIMEApplication(open(os.getcwd()+'/html-download/'+allAttachmentName[i],'rb').read())
+        attachmentFile.add_header('Content-Disposition', 'attachment', filename=allAttachmentName[i])
         message.attach(attachmentFile)
     for i in range(len(jsonSendingData["to"])):
         if len(newAnnouncementList)==0 and jsonSendingData['to'][i]["isadmin"]==False:
@@ -186,30 +188,34 @@ def downloadWebFile(newAnnouncement):
         fileName=htmlIndex+'_'+newAnnouncement[i][4]+'_'+newAnnouncement[i][2]
         html=etree.HTML(getHTMLPage('http://nbw.sztu.edu.cn/info/'+newAnnouncement[i][1]+'.htm'))
         xpathFinder='//html/body/div/form/div/ul/li'
-        attachmentName=[]
+        # allAttachmentName=[]
         attachmentLink=[]
         attachmentDivsNum=len(html.xpath(xpathFinder))
         if attachmentDivsNum>0:
-            for i in range(0,attachmentDivsNum):
-                attachmentName.append(html.xpath(xpathFinder+'/a')[i].text)
-                attachmentLink.append(html.xpath(xpathFinder+'/a/@href')[i])
-            print(attachmentName)
-            for j in range(len(attachmentName)):
-                attachmentName[j]=htmlIndex+'_'+attachmentName[j]
+            for l in range(0,attachmentDivsNum):
+                allAttachmentName.append(html.xpath(xpathFinder+'/a')[l].text)
+                attachmentLink.append(html.xpath(xpathFinder+'/a/@href')[l])
+            # print(allAttachmentName)
+            # for j in range(len(allAttachmentName)-1,len(allAttachmentName)-1-attachmentDivsNum,-1):
+            for j in range(-1,-1-attachmentDivsNum,-1):
+                allAttachmentName[j]=htmlIndex+'_'+allAttachmentName[j]
             fileName+='_hasAttachment'
-            for k in range(len(attachmentLink)):
-                downloadAttachment(attachmentLink[k],attachmentName[k])
-            allAttachmentName.append(attachmentName)
+            for k in range(-1,-1-attachmentDivsNum,-1):
+                headers['Referer'] = 'http://nbw.sztu.edu.cn/info/'+newAnnouncement[i][1]+'.htm'
+                downloadAttachment(attachmentLink[k],allAttachmentName[k])
+            # allAttachmentName.append(allAttachmentName)
         saveHTMLpage(etree.tostring(html).decode('utf-8'),fileName)
         allFileName.append(fileName)
+    headers['Referer'] = 'http://nbw.sztu.edu.cn/'
     return allFileName,allAttachmentName
 
 def downloadAttachment(URL,fileName):
-    r=requests.get(url='http://nbw.sztu.edu.cn/'+URL,stream=True)
+    r=requests.get(url='http://nbw.sztu.edu.cn/'+URL,stream=True,headers=headers)
     with open(os.getcwd()+'/html-download/'+fileName,mode='wb+') as att:
         for chunk in r.iter_content(chunk_size=1024):
             if chunk:
                 att.write(chunk)
+    # print(r.headers)
 
 if __name__=='__main__':
     try:
