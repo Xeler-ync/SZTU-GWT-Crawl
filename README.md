@@ -2,8 +2,8 @@
 Crawl GWT from SZTU's nbw
 
 ## 使用
-1. 在 sender.email.acc.pss.json 中填写信息
-2. 启动 SZTU-GWT-Crawl.py
+1. 启动 SZTU-GWT-Crawl.py ，在自动生成的 sender.email.acc.pss.json 中填写信息
+2. 再次启动 SZTU-GWT-Crawl.py
 
 ## sender.email.acc.pss.json 文件内容
 ```json
@@ -23,6 +23,7 @@ Crawl GWT from SZTU's nbw
     "title": ""             //邮件标题
 }
 ```
+
 ## 兼容性
 1. 仅测试过Windows 10 20H2平台
 2. 仅测试过QQ STMP服务器
@@ -39,7 +40,6 @@ Crawl GWT from SZTU's nbw
 ## v1.1
 - (2021-11-15)
 - > 可以下载页面文件与附件，并作为邮件的附件发送
-
 
 ## v1.0
 - (2021-09-17)
