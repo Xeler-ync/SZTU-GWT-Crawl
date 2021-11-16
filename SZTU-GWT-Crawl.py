@@ -95,27 +95,25 @@ def getTotalPageFromFirstPageHTML(html):
     return totalPage[0]
 
 def getGWTPageInfo(page,html,totalPage):
-    if page==0:
+    if page==0: # 提高鲁棒性
         return [['No Page 0']*5]
-    if html=='':
+    if html=='': # 爬主页
         html=getGWTPageHTML(1,totalPage)
     if totalPage==0:
         totalPage=getTotalPageFromFirstPageHTML(html)
     html=html.replace('\n','')
     html=html.replace('\r','')
-    html=html.replace('<img src="images/fujian.png">','1')#优化返回的内容
+    html=html.replace('<img src="images/fujian.png">','1') # 优化返回的内容
     if page>int(totalPage):
         return [['Page too big, max is '+str(totalPage)]*5]
     listFinder='style="font-size: 14px;">(.*?)</a></div><div class="pull-left width04 txt-elise text-left" style="width:54%;"><a href="info/([0-9]+/[0-9]+).htm" title=".*?" target="_blank" style=".*?">(.*?)</a></div><div class="pull-left width05"  style="width:5%;height:32px;">(.*?)</div><div class="pull-right width06"  style="width:11%;">([0-9-]+)</div></li>'
-    announcementInfoTuple=re.findall(listFinder,html,re.S)#source, index, title, hasAttachment, date
+    announcementInfoTuple=re.findall(listFinder,html,re.S) # source, index, title, hasAttachment, date
     announcementInfoList=list(announcementInfoTuple)
     for i in range(len(announcementInfoList)):
         announcementInfoList[i]=list(announcementInfoList[i])
     return announcementInfoList, totalPage
 
-def getHTMLPage(url):
-    html=requests.get(url).content.decode('utf-8')
-    return html
+def getHTMLPage(url): return requests.get(url).content.decode('utf-8')
 
 def downloadWebFile(newAnnouncement):
     allFileName=[]
