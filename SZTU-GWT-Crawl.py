@@ -1,19 +1,10 @@
 #coding=utf-8
 
-import os
-import json
-
+from FileControl import *
 from TimeLibs import *
 from SentEmailLibs import *
 from CrawlLibs import *
-
-
-headers={
-    'Referer' : 'http://nbw.sztu.edu.cn/',
-    'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36'
-}
-startTime=''
-pauseHours=1
+from DefaultHeaders import *
 
 
 def createEmailContentFromNewAnnouncement(newAnnouncement):
@@ -54,18 +45,6 @@ def markRepetedAnnouncement(announcementInfoList):
                     announcementInfoList[i][3]+='r'
     return
 
-def saveRecentGWTCode(announcementInfoList):
-    codeList=[]
-    for i in range(len(announcementInfoList)):
-        codeList.append(announcementInfoList[i][1]+'\n')
-    writeGWTPreviousCache(codeList)
-    return
-
-def writeGWTPreviousCache(numList):
-    with open(file=os.getcwd()+'/GWT.previous.cache.txt',mode='w+',encoding='utf-8') as gpc:
-        gpc.writelines(numList)
-    return
-
 def sentGWTMessage(content,newAnnonucementNum,allHTMLName,allAttachmentName):
     allHTMLName.sort()
     allAttachmentName.sort()
@@ -100,30 +79,6 @@ def sentGWTMessage(content,newAnnonucementNum,allHTMLName,allAttachmentName):
             print ('Email sent failed --> ' + str(error))
     emailSever.quit()
 
-def openInfosFile():#if no, creat one
-    try:
-        with open(file=os.getcwd()+'/sender.email.acc.pss.json',mode='r',encoding='utf-8') as sea:
-            jsonData=json.load(sea)
-            return jsonData
-    except OSError:
-        with open(file=os.getcwd()+'/sender.email.acc.pss.json',mode='w+',encoding='utf-8') as sea:
-            sea.writelines('{')
-            sea.writelines('    "fromaddress": "",\n')
-            sea.writelines('    "fromname": "",\n')
-            sea.writelines('    "to": [\n')
-            sea.writelines('        {\n')
-            sea.writelines('            "name" : "",\n')
-            sea.writelines('            "address" : "",\n')
-            sea.writelines('            "isadmin" : ,\n')
-            sea.writelines('    "qqcode": "",\n')
-            sea.writelines('    "smtpserver": "smtp.qq.com",\n')
-            sea.writelines('    "smtpport": 465\n')
-            sea.writelines('    "title": ""\n')
-            sea.writelines('}')
-            print('Please correctly fill in the sender.email.acc.pss.json first.')
-            input('Press Enter to quit')
-            exit()
-
 def getGWTPageHTML(page,totalPage):
     if page==1 and totalPage==0:
         html=requests.get(url='http://nbw.sztu.edu.cn/list.jsp?urltype=tree.TreeTempUrl&wbtreeid=1029',headers=headers).content.decode('utf-8')
@@ -157,11 +112,6 @@ def getGWTPageInfo(page,html,totalPage):
     for i in range(len(announcementInfoList)):
         announcementInfoList[i]=list(announcementInfoList[i])
     return announcementInfoList, totalPage
-
-def saveHTMLpage(content,name):
-    with open(os.getcwd()+'/html-download/'+name+'.htm',mode='w+',encoding='utf-8') as file:
-        file.write(content)
-    return
 
 def getHTMLPage(url):
     html=requests.get(url).content.decode('utf-8')
@@ -210,6 +160,7 @@ if __name__=='__main__':
     except:
         pass
     while True:
+        pauseHours=1
         startTime=datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
         (announcementInfoList,totalPage)=getGWTPageInfo(1,'',0)
         markRepetedAnnouncement(announcementInfoList)
