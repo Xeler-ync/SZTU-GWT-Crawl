@@ -2,17 +2,14 @@ import os
 import json
 
 
-def saveRecentGWTCode(announcementInfoList):
+def save_recent_GWT_code(announcementInfoList):
     codeList=[]
     for i in range(len(announcementInfoList)):
         codeList.append(announcementInfoList[i][1]+'\n')
-    writeGWTPreviousCache(codeList)
+    write_GWT_previous_cache(codeList)
     return
 
-def writeGWTPreviousCache(numList):
-    # writeFile('./GWT.previous.cache.txt',numList)
-    open(file=os.getcwd()+'/GWT.previous.cache.txt',mode='w+',encoding='utf-8').writelines(numList)
-    return None
+def write_GWT_previous_cache(numList): open(file=os.getcwd()+'/GWT.previous.cache.txt',mode='w+',encoding='utf-8').writelines(numList)
 
 def openInfosFile():#if no, creat one
     try:
@@ -38,12 +35,9 @@ def openInfosFile():#if no, creat one
         input('Press Enter to quit')
         exit()
 
-def saveHTMLpage(content,name):
-    # writeFile('./html-download/%s.htm' % name,content)
-    open(os.getcwd()+'/html-download/'+name+'.htm',mode='w+',encoding='utf-8').write(content)
-    return None
+def save_HTML_page(content,name): open(os.getcwd()+'/html-download/'+name+'.htm',mode='w+',encoding='utf-8').write(content)
 
-def writeFile(path,content):
-    with open(file=path,mode='w+',encoding='utf-8') as f:
-        f.write(content)
-    return None
+# def write_file(path,content):
+#     with open(file=path,mode='w+',encoding='utf-8') as f:
+#         f.write(content)
+#     return None
