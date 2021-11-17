@@ -68,7 +68,7 @@ def send_GWT_message(content,new_annonucement_num,all_HTML_name,announcement_inf
         attachmentFile.add_header('Content-Disposition', 'attachment', filename=announcement_info_list[i])
         message.attach(attachmentFile)
     for i in range(len(json_sending_data["to"])):
-        if len(newAnnouncementList) == 0 and not json_sending_data['to'][i]["isadmin"]:
+        if len(new_announcement_list) == 0 and not json_sending_data['to'][i]["isadmin"]:
             print('No new announcement, ignore '+json_sending_data["to"][i]["name"]+' '+json_sending_data["to"][i]["address"])
             continue
         message["To"] = formataddr([json_sending_data["to"][i]["name"],json_sending_data["to"][i]["address"]])#recever
@@ -162,10 +162,10 @@ if __name__ == '__main__':
         (announcement_info_list,total_page) = get_GWT_page_info(1,'',0)
         mark_sent_announcement(announcement_info_list)
         save_recent_GWT_code(announcement_info_list)
-        newAnnouncementList = separate_new_announcement(announcement_info_list)
-        emailContent = create_email_content_from_new_announcement(newAnnouncementList)
-        print(str(len(newAnnouncementList))+' new announcement(s)')
-        all_HTML_name,announcement_info_list = downloadWebFile(newAnnouncementList)
-        send_GWT_message(emailContent,len(newAnnouncementList),all_HTML_name,announcement_info_list)
+        new_announcement_list = separate_new_announcement(announcement_info_list)
+        emailContent = create_email_content_from_new_announcement(new_announcement_list)
+        print(str(len(new_announcement_list))+' new announcement(s)')
+        all_HTML_name,announcement_info_list = downloadWebFile(new_announcement_list)
+        send_GWT_message(emailContent,len(new_announcement_list),all_HTML_name,announcement_info_list)
         print('Sleep from '+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')+' to '+(datetime.datetime.now()+datetime.timedelta(hours=pause_hours)).strftime('%Y-%m-%d_%H:%M:%S'))
         time.sleep(pause_hours*3600)
