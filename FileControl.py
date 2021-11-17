@@ -2,16 +2,15 @@ import os
 import json
 
 
-def save_recent_GWT_code(announcementInfoList):
-    codeList=[]
-    for i in range(len(announcementInfoList)):
-        codeList.append(announcementInfoList[i][1]+'\n')
-    write_GWT_previous_cache(codeList)
-    return
+def save_recent_GWT_code(index_list) -> None:
+    for i in range(len(index_list)):
+        index_list[i] = index_list[i].replace('r','')
+    write_GWT_previous_cache(index_list)
+    return None
 
-def write_GWT_previous_cache(numList): open(file=os.getcwd()+'/GWT.previous.cache.txt',mode='w+',encoding='utf-8').writelines(numList)
+def write_GWT_previous_cache(numList) -> None: open(file=os.getcwd()+'/GWT.previous.cache.txt',mode='w+',encoding='utf-8').writelines(numList)
 
-def openInfosFile():#if no, creat one
+def openInfosFile() -> None:#if no, creat one
     try:
         with open(file=os.getcwd()+'/sender.email.acc.pss.json',mode='r',encoding='utf-8') as sea:
             jsonData=json.load(sea)
@@ -34,8 +33,9 @@ def openInfosFile():#if no, creat one
         print('Please correctly fill in the sender.email.acc.pss.json first.')
         input('Press Enter to quit')
         exit()
+    return None
 
-def save_HTML_page(content,name): open(os.getcwd()+'/html-download/'+name+'.htm',mode='w+',encoding='utf-8').write(content)
+def save_HTML_page(content,name) -> None: open(os.getcwd()+'/html-download/'+name+'.htm',mode='w+',encoding='utf-8').write(content)
 
 # def write_file(path,content):
 #     with open(file=path,mode='w+',encoding='utf-8') as f:
