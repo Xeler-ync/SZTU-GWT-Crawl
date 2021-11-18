@@ -123,9 +123,9 @@ def get_HTML_page(url): return requests.get(url).content.decode('utf-8')
 def downloadWebFile():
     all_file_name = []
     announcement_info_list = []
-    for i in range(len(AnnouncementInfo.source_list)):
+    for i in range(len(AnnouncementInfo.academy_list)):
         file_name = AnnouncementInfo.index_list+'_'+AnnouncementInfo.date_list[i]+'_'+AnnouncementInfo.title_list[i]
-        html = etree.HTML(get_HTML_page('http://nbw.sztu.edu.cn/info/'+AnnouncementInfo.source_list[i]+'.htm'))
+        html = etree.HTML(get_HTML_page('http://nbw.sztu.edu.cn/info/'+AnnouncementInfo.academy_list[i]+'.htm'))
         xpath_finder = '//html/body/div/form/div/ul/li'
         attachment_link = []
         attachment_divs_num = len(html.xpath(xpath_finder))
@@ -137,7 +137,7 @@ def downloadWebFile():
                 announcement_info_list[j] = AnnouncementInfo.index_list[i]+'_'+announcement_info_list[j]
             file_name += '_hasAttachment'
             for k in range(-1,-1-attachment_divs_num,-1):
-                headers['Referer'] = 'http://nbw.sztu.edu.cn/info/'+AnnouncementInfo.source_list[i]+'.htm'
+                headers['Referer'] = 'http://nbw.sztu.edu.cn/info/'+AnnouncementInfo.academy_list[i]+'.htm'
                 download_attachment(attachment_link[k],announcement_info_list[k])
         save_HTML_page(etree.tostring(html).decode('utf-8'),file_name)
         all_file_name.append(file_name)
@@ -165,8 +165,8 @@ if __name__ == '__main__':
         AnnouncementInfo.remove_duplication()
         # new_announcement_list = separate_new_announcement(announcement_info_list)
         emailContent = create_email_content_from_new_announcement()
-        print(str(len(AnnouncementInfo.source_list))+' new announcement(s)')
-        all_HTML_name,announcement_info_list = downloadWebFile(AnnouncementInfo)
+        print(str(len(AnnouncementInfo.academy_list))+' new announcement(s)')
+        all_HTML_name,announcement_info_list = downloadWebFile()
         send_GWT_message(emailContent,all_HTML_name,announcement_info_list)
         print('Sleep from '+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')+' to '+(datetime.datetime.now()+datetime.timedelta(hours=pause_hours)).strftime('%Y-%m-%d_%H:%M:%S'))
         time.sleep(pause_hours*3600)
