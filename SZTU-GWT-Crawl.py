@@ -10,10 +10,10 @@ from ClassSubPageInfo import *
 
 
 def create_email_content_from_new_announcement():
-    content = 'There is(are) '+str(len(AnnouncementInfo.source_list))+' new announcement(s) now!\n'
+    content = 'There is(are) '+str(len(AnnouncementInfo.academy_list))+' new announcement(s) now!\n'
     content += 'The message was generated at '+start_time+'\n'
     content += '\n'
-    for i in range(len(AnnouncementInfo.source_list)):
+    for i in range(len(AnnouncementInfo.academy_list)):
         content += '\n'
         content += 'From: '+AnnouncementInfo.academy_list[i]+'\n'
         content += 'Date: '+AnnouncementInfo.date_list[i]+'\n'
@@ -31,12 +31,12 @@ def create_email_content_from_new_announcement():
     content += '完整的免责声明见程序发布页或向邮件发送者索取'
     return content
 
-def separate_new_announcement(announcement_info_list):
-    new_announcement = []
-    for i in range(len(announcement_info_list)):
-        if announcement_info_list[i][3].find('r') == -1:
-            new_announcement.append(announcement_info_list[i])
-    return new_announcement
+# def separate_new_announcement(AnnouncementInfo.attachment_file_list):
+    # new_announcement = []
+    # for i in range(len(AnnouncementInfo.attachment_file_list)):
+    #     if AnnouncementInfo.attachment_file_list[i][3].find('r') == -1:
+    #         new_announcement.append(AnnouncementInfo.attachment_file_list[i])
+    # return new_announcement
 
 def mark_sent_announcement() -> None:
     with open(file=os.getcwd()+'/GWT.previous.cache.txt',mode='r',encoding='utf-8') as gpc:
@@ -47,9 +47,7 @@ def mark_sent_announcement() -> None:
                     AnnouncementInfo.index_list[i] += 'r'
     return None
 
-def send_GWT_message(content,all_HTML_name,announcement_info_list):
-    all_HTML_name.sort()
-    announcement_info_list.sort()
+def send_GWT_message(content): # ,all_HTML_name,an1nouncement_info_list):
     json_sending_data = openInfosFile()
     #set sever
     email_sever = smtplib.SMTP_SSL(json_sending_data["smtpserver"],json_sending_data["smtpport"])
@@ -57,20 +55,20 @@ def send_GWT_message(content,all_HTML_name,announcement_info_list):
     message = MIMEMultipart()   #define message
     message.attach(MIMEText(content, 'plain', 'utf-8'))
     message['from'] = formataddr([json_sending_data["fromname"],json_sending_data["fromaddress"]])#sender
-    if len(AnnouncementInfo.source_list) == 0:
+    if len(AnnouncementInfo.academy_list) == 0:
         message['Subject'] = Header('No new GWT announcement', 'utf-8')  #email title
     else:
         message['Subject'] = Header(json_sending_data["title"], 'utf-8')  #email title
-    for i in range(len(all_HTML_name)):
-        HTMLFile = MIMEApplication(open(os.getcwd()+'/html-download/{}.htm'.format(all_HTML_name[i]),mode='r',encoding='utf-8').read())
-        HTMLFile.add_header('Content-Disposition', 'attachment', filename=all_HTML_name[i]+'.htm')
+    for i in range(len(AnnouncementInfo.HTML_file_list)):
+        HTMLFile = MIMEApplication(open(os.getcwd()+'/html-download/{}.htm'.format(AnnouncementInfo.HTML_file_list[i]),mode='r',encoding='utf-8').read())
+        HTMLFile.add_header('Content-Disposition', 'attachment', filename=AnnouncementInfo.HTML_file_list[i]+'.htm')
         message.attach(HTMLFile)
-    for i in range(len(announcement_info_list)):
-        attachmentFile = MIMEApplication(open(os.getcwd()+'/html-download/'+announcement_info_list[i],'rb').read())
-        attachmentFile.add_header('Content-Disposition', 'attachment', filename=announcement_info_list[i])
+    for i in range(len(AnnouncementInfo.attachment_file_list)):
+        attachmentFile = MIMEApplication(open(os.getcwd()+'/html-download/'+AnnouncementInfo.attachment_file_list[i],'rb').read())
+        attachmentFile.add_header('Content-Disposition', 'attachment', filename=AnnouncementInfo.attachment_file_list[i])
         message.attach(attachmentFile)
     for i in range(len(json_sending_data["to"])):
-        if len(AnnouncementInfo.source_list) == 0 and not json_sending_data['to'][i]["isadmin"]:
+        if len(AnnouncementInfo.academy_list) == 0 and not json_sending_data['to'][i]["isadmin"]:
             print('No new announcement, ignore '+json_sending_data["to"][i]["name"]+' '+json_sending_data["to"][i]["address"])
             continue
         message["To"] = formataddr([json_sending_data["to"][i]["name"],json_sending_data["to"][i]["address"]])#recever
@@ -83,10 +81,10 @@ def send_GWT_message(content,all_HTML_name,announcement_info_list):
 
 def get_GWT_page_HTML(page,total_page):
     if page == 1 and total_page == 0:
-        return requests.get(url='http://nbw.sztu.edu.cn/list.jsp?urltype=tree.TreeTempUrl&wbtreeid=1029',headers=headers).content.decode('utf-8')
+        return get_HTML_page('http://nbw.sztu.edu.cn/list.jsp?urltype=tree.TreeTempUrl&wbtreeid=1029')
     else:
         url = 'http://nbw.sztu.edu.cn/list.jsp?totalpage='+str(total_page)+'&PAGENUM='+str(page)+'&urltype=tree.TreeTempUrl&wbtreeid=1029'
-        return requests.get(url=url,headers=headers).content.decode('utf-8')
+        return get_HTML_page(url)
 
 def get_total_page_from_first_page_HTML(html):
     if html == '':
@@ -118,31 +116,34 @@ def get_GWT_page_info(page,html,total_page):
     )
     return AnnouncementInfo, total_page
 
-def get_HTML_page(url): return requests.get(url).content.decode('utf-8')
+def get_HTML_page(url): return requests.get(url=url,headers=headers).content.decode('utf-8')
 
-def downloadWebFile():
-    all_file_name = []
-    announcement_info_list = []
+def downloadWebFile() -> None:
+    # all_file_name = []
+    # AnnouncementInfo.attachment_file_list = []
     for i in range(len(AnnouncementInfo.academy_list)):
-        file_name = AnnouncementInfo.index_list+'_'+AnnouncementInfo.date_list[i]+'_'+AnnouncementInfo.title_list[i]
+        page_index = re.findall('/([0-9]+)',AnnouncementInfo.index_list[i],re.S)[0]
+        HTML_file_name = replace_illegal_char(page_index+'_'+AnnouncementInfo.date_list[i]+'_'+AnnouncementInfo.title_list[i])
         html = etree.HTML(get_HTML_page('http://nbw.sztu.edu.cn/info/'+AnnouncementInfo.academy_list[i]+'.htm'))
-        xpath_finder = '//html/body/div/form/div/ul/li'
+        # xpath_finder = '//html/body/div/form/div/ul/li'
+        xpath_finder = '//div/form/div/ul/li'
         attachment_link = []
+        attachment_divs_list = html.xpath(xpath_finder)
         attachment_divs_num = len(html.xpath(xpath_finder))
         if attachment_divs_num>0:
             for l in range(0,attachment_divs_num):
-                announcement_info_list.append(html.xpath(xpath_finder+'/a')[l].text)
+                AnnouncementInfo.add_attachment_file(replace_illegal_char(html.xpath(xpath_finder+'/a')[l].text))
                 attachment_link.append(html.xpath(xpath_finder+'/a/@href')[l])
             for j in range(-1,-1-attachment_divs_num,-1):
-                announcement_info_list[j] = AnnouncementInfo.index_list[i]+'_'+announcement_info_list[j]
-            file_name += '_hasAttachment'
+                AnnouncementInfo.attachment_file_list[j] = page_index+'_'+AnnouncementInfo.attachment_file_list[j]
+            HTML_file_name += '_hasAttachment'
             for k in range(-1,-1-attachment_divs_num,-1):
                 headers['Referer'] = 'http://nbw.sztu.edu.cn/info/'+AnnouncementInfo.academy_list[i]+'.htm'
-                download_attachment(attachment_link[k],announcement_info_list[k])
-        save_HTML_page(etree.tostring(html).decode('utf-8'),file_name)
-        all_file_name.append(file_name)
+                download_attachment(attachment_link[k],AnnouncementInfo.attachment_file_list[k])
+        save_HTML_page(etree.tostring(html).decode('utf-8'),HTML_file_name)
+        AnnouncementInfo.add_HTML_file(HTML_file_name)
     headers['Referer'] = 'http://nbw.sztu.edu.cn/'
-    return all_file_name,announcement_info_list
+    return None # all_file_name,AnnouncementInfo.attachment_file_list
 
 def download_attachment(URL,file_name):
     r = requests.get(url='http://nbw.sztu.edu.cn/'+URL,stream=True,headers=headers)
@@ -160,13 +161,13 @@ if __name__ == '__main__':
         pause_hours = 1
         start_time = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
         (AnnouncementInfo,total_page) = get_GWT_page_info(1,'',0)
-        AnnouncementInfo.index_list = mark_sent_announcement()
+        mark_sent_announcement()
         save_recent_GWT_code(AnnouncementInfo.index_list)
-        AnnouncementInfo.remove_duplication()
-        # new_announcement_list = separate_new_announcement(announcement_info_list)
+        AnnouncementInfo.remove_duplicate_page()
+        # new_announcement_list = separate_new_announcement(AnnouncementInfo.attachment_file_list)
         emailContent = create_email_content_from_new_announcement()
         print(str(len(AnnouncementInfo.academy_list))+' new announcement(s)')
-        all_HTML_name,announcement_info_list = downloadWebFile()
-        send_GWT_message(emailContent,all_HTML_name,announcement_info_list)
+        downloadWebFile()
+        send_GWT_message(emailContent) # ,AnnouncementInfo.HTML_file_list,AnnouncementInfo.attachment_file_list
         print('Sleep from '+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')+' to '+(datetime.datetime.now()+datetime.timedelta(hours=pause_hours)).strftime('%Y-%m-%d_%H:%M:%S'))
         time.sleep(pause_hours*3600)

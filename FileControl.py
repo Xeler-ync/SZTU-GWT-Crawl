@@ -35,7 +35,22 @@ def openInfosFile() -> None:#if no, creat one
         exit()
     return None
 
-def save_HTML_page(content,name) -> None: open(os.getcwd()+'/html-download/'+name+'.htm',mode='w+',encoding='utf-8').write(content)
+# def save_HTML_page(content,name) -> None: open(os.getcwd()+'\\html-download\\'+name+'.htm',mode='w+',encoding='utf-8').write(content)
+def save_HTML_page(content,name) -> None:
+    with open(os.getcwd()+'/html-download/'+name+'.htm',mode='w+',encoding='utf-8') as f:
+        f.write(content)
+
+def replace_illegal_char(ipt) -> str:
+    ipt = ipt.replace('<','[半角前尖括号]')
+    ipt = ipt.replace('>','[半角后尖括号]')
+    ipt = ipt.replace('\\','[半角反斜杠]')
+    ipt = ipt.replace('/','[半角正斜杠]')
+    ipt = ipt.replace('"','[半角双引号]')
+    ipt = ipt.replace('|','[半角竖线]')
+    ipt = ipt.replace('?','[半角问号]')
+    ipt = ipt.replace('*','[半角星号]')
+    ipt = ipt.replace(':','[半角冒号]')
+    return ipt
 
 # def write_file(path,content):
 #     with open(file=path,mode='w+',encoding='utf-8') as f:
