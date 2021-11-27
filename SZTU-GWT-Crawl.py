@@ -1,10 +1,11 @@
 #coding=utf-8
 
-from requests.api import head
-from FileControl import *
 from TimeLibs import *
 from SentEmailLibs import *
 from CrawlLibs import *
+
+from FunctionFileControl import *
+from FunctionCrawlPage import *
 
 from ClassHeaders import *
 from ClassSubPageInfo import *
@@ -80,13 +81,6 @@ def send_GWT_message(content): # ,all_HTML_name,an1nouncement_info_list):
             print('Email sent failed --> ' + str(error))
     email_sever.quit()
 
-def get_GWT_page_HTML(page,total_page):
-    if page == 1 and total_page == 0:
-        url = 'http://nbw.sztu.edu.cn/list.jsp?urltype=tree.TreeTempUrl&wbtreeid=1029'
-    else:
-        url = 'http://nbw.sztu.edu.cn/list.jsp?totalpage='+str(total_page)+'&PAGENUM='+str(page)+'&urltype=tree.TreeTempUrl&wbtreeid=1029'
-    return get_HTML_page(url)
-
 def get_total_page_from_first_page_HTML(html):
     if html == '':
         html = get_GWT_page_HTML(1,0)
@@ -117,49 +111,13 @@ def get_GWT_page_info(page,html,total_page):
     )
     return AnnouncementInfo, total_page
 
-def get_HTML_page(url):
-    respond = requests.get(url=url,headers=headers.headers)
-    if not headers.headers['Cookie']:
-        cookie_str = ''
-        for key,value in requests.utils.dict_from_cookiejar(respond.cookies).items():
-            cookie_str += key + '=' + value
-        headers.headers['Cookie'] = cookie_str
-    headers.headers['Referer'] = url
-    return respond.content.decode('utf-8')
-
-def downloadWebFile() -> None:
-    # all_file_name = []
-    # AnnouncementInfo.attachment_file_list = []
-    for i in range(len(AnnouncementInfo.academy_list)):
-        page_index = re.findall('/([0-9]+)',AnnouncementInfo.index_list[i],re.S)[0]
-        HTML_file_name = replace_illegal_char(page_index+'_'+AnnouncementInfo.date_list[i]+'_'+AnnouncementInfo.title_list[i])
-        html = etree.HTML(get_HTML_page('http://nbw.sztu.edu.cn/info/'+AnnouncementInfo.index_list[i]+'.htm'))
-        # xpath_finder = '//html/body/div/form/div/ul/li'
-        xpath_finder = '//div/form/div/ul/li'
-        attachment_link = []
-        attachment_divs_list = html.xpath(xpath_finder)
-        attachment_divs_num = len(html.xpath(xpath_finder))
-        if attachment_divs_num>0:
-            for l in range(0,attachment_divs_num):
-                AnnouncementInfo.add_attachment_file(replace_illegal_char(html.xpath(xpath_finder+'/a')[l].text))
-                attachment_link.append(html.xpath(xpath_finder+'/a/@href')[l])
-            for j in range(-1,-1-attachment_divs_num,-1):
-                AnnouncementInfo.attachment_file_list[j] = page_index+'_'+AnnouncementInfo.attachment_file_list[j]
-            HTML_file_name += '_hasAttachment'
-            for k in range(-1,-1-attachment_divs_num,-1):
-                headers.headers['Referer'] = 'http://nbw.sztu.edu.cn/info/'+AnnouncementInfo.index_list[i]+'.htm'
-                download_attachment(attachment_link[k],AnnouncementInfo.attachment_file_list[k])
-        save_HTML_page(etree.tostring(html).decode('utf-8'),HTML_file_name)
-        AnnouncementInfo.add_HTML_file(HTML_file_name)
-    headers.headers['Referer'] = 'http://nbw.sztu.edu.cn/'
-    return None # all_file_name,AnnouncementInfo.attachment_file_list
-
-def download_attachment(URL,file_name):
-    r = requests.get(url='http://nbw.sztu.edu.cn/'+URL,stream=True,headers=headers.headers)
-    with open(os.getcwd()+'/html-download/'+file_name,mode='wb+') as att:
-        for chunk in r.iter_content(chunk_size=1024):
-            if chunk:
-                att.write(chunk)
+def get_GWT_page_HTML(page:int,total_page:int):
+    url = ''
+    if page == 1 and total_page == 0:
+        url = 'http://nbw.sztu.edu.cn/list.jsp?urltype=tree.TreeTempUrl&wbtreeid=1029'
+    else:
+        url = 'http://nbw.sztu.edu.cn/list.jsp?totalpage='+str(total_page)+'&PAGENUM='+str(page)+'&urltype=tree.TreeTempUrl&wbtreeid=1029'
+    return get_HTML_page(url,Headers.headers)
 
 if __name__ == '__main__':
     try:
@@ -169,7 +127,7 @@ if __name__ == '__main__':
     while True:
         pause_hours = 1
         start_time = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
-        headers = Headers(cookie='')
+        Headers = HeadersMoudle(cookie='')
         (AnnouncementInfo,total_page) = get_GWT_page_info(1,'',0)
         mark_sent_announcement()
         save_recent_GWT_code(AnnouncementInfo.index_list)
@@ -177,7 +135,7 @@ if __name__ == '__main__':
         # new_announcement_list = separate_new_announcement(AnnouncementInfo.attachment_file_list)
         emailContent = create_email_content_from_new_announcement()
         print(str(len(AnnouncementInfo.academy_list))+' new announcement(s)')
-        downloadWebFile()
+        download_web_file(AnnouncementInfo,Headers.headers)
         send_GWT_message(emailContent) # ,AnnouncementInfo.HTML_file_list,AnnouncementInfo.attachment_file_list
         print('Sleep from '+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')+' to '+(datetime.datetime.now()+datetime.timedelta(hours=pause_hours)).strftime('%Y-%m-%d_%H:%M:%S'))
         time.sleep(pause_hours*3600)
