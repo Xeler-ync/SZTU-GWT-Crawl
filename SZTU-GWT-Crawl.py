@@ -27,7 +27,7 @@ def create_email_content_from_new_announcement():
             content += 'Attachment: True\n'
     content += '\n'
     content += '\n'
-    content += 'The message was sent at '+datetime.datetime.now().strftime('%y-%m-%d_%H:%M:%S')+'\n'
+    content += 'The message was sent at '+'datetime.datetime.now().strftime("%y-%m-%d_%H:%M:%S")'+'\n'
     content += '\n'
     content += '本程序所提供的信息，仅供参考之用。所有数据来自深圳技术大学内部网，版权归深圳技术大学及相关发布人所有。\n'
     content += '完整的免责声明见程序发布页或向邮件发送者索取'
@@ -55,7 +55,6 @@ def send_GWT_message(content): # ,all_HTML_name,an1nouncement_info_list):
     email_sever = smtplib.SMTP_SSL(json_sending_data["smtpserver"],json_sending_data["smtpport"])
     email_sever.login(json_sending_data["fromaddress"],json_sending_data["qqcode"])
     message = MIMEMultipart()   #define message
-    message.attach(MIMEText(content, 'plain', 'utf-8'))
     message['from'] = formataddr([json_sending_data["fromname"],json_sending_data["fromaddress"]])#sender
     if len(AnnouncementInfo.academy_list) == 0:
         message['Subject'] = Header('No new GWT announcement', 'utf-8')  #email title
@@ -69,6 +68,8 @@ def send_GWT_message(content): # ,all_HTML_name,an1nouncement_info_list):
         attachmentFile = MIMEApplication(open(os.getcwd()+'/html-download/'+AnnouncementInfo.attachment_file_list[i],'rb').read())
         attachmentFile.add_header('Content-Disposition', 'attachment', filename=AnnouncementInfo.attachment_file_list[i])
         message.attach(attachmentFile)
+    content = content.replace('datetime.datetime.now().strftime("%y-%m-%d_%H:%M:%S")',datetime.datetime.now().strftime("%y-%m-%d_%H:%M:%S"))
+    message.attach(MIMEText(content, 'plain', 'utf-8'))
     for i in range(len(json_sending_data["to"])):
         if len(AnnouncementInfo.academy_list) == 0 and not json_sending_data['to'][i]["isadmin"]:
             print('No new announcement, ignore '+json_sending_data["to"][i]["name"]+' '+json_sending_data["to"][i]["address"])
