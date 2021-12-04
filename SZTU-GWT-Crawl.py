@@ -63,7 +63,7 @@ if __name__ == '__main__':
         Headers = HeadersMoudle(cookie='')
         (AnnouncementInfo,total_page) = get_GWT_page_info(1,'',0)
         mark_sent_announcement(AnnouncementInfo)
-        save_recent_GWT_code(AnnouncementInfo.index_list[:])
+        save_recent_page_code(AnnouncementInfo.index_list[:],AnnouncementInfo.cache_file_path)
         AnnouncementInfo.remove_duplicate_page()
         AnnouncementInfo.remove_deplicate_mark()
         # new_announcement_list = separate_new_announcement(AnnouncementInfo.attachment_file_list)

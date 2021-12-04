@@ -1,13 +1,13 @@
 import json
 
 
-def save_recent_GWT_code(index_list) -> None:
+def save_recent_page_code(index_list,path) -> None:
     for i in range(len(index_list)):
         index_list[i] = index_list[i].replace('r','')
-    write_GWT_previous_cache(index_list)
+    write_GWT_previous_cache(index_list,path)
     return None
 
-def write_GWT_previous_cache(num_list) -> None: open(file='./GWT.previous.cache.txt',mode='w+',encoding='utf-8').writelines(f'{i}\n' for i in num_list)
+def write_GWT_previous_cache(num_list,path) -> None: open(file=path,mode='w+',encoding='utf-8').writelines(f'{i}\n' for i in num_list)
 
 def openInfosFile() -> None:#if no, creat one
     try:
