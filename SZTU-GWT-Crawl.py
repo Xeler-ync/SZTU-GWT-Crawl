@@ -66,11 +66,9 @@ if __name__ == '__main__':
         save_recent_page_code(AnnouncementInfo.index_list[:],AnnouncementInfo.cache_file_path)
         AnnouncementInfo.remove_duplicate_page()
         AnnouncementInfo.remove_deplicate_mark()
-        # new_announcement_list = separate_new_announcement(AnnouncementInfo.attachment_file_list)
-        # emailContent = create_email_content_from_new_GWT_announcement(AnnouncementInfo,start_time)
         AnnouncementInfo.creat_email_content(start_time)
         print(str(len(AnnouncementInfo.academy_list))+' new announcement(s)')
         download_web_file(AnnouncementInfo,Headers.headers)
-        send_GWT_message(AnnouncementInfo) # ,AnnouncementInfo.HTML_file_list,AnnouncementInfo.attachment_file_list
+        send_GWT_message(AnnouncementInfo)
         print('Sleep from '+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')+' to '+(datetime.datetime.now()+datetime.timedelta(hours=pause_hours)).strftime('%Y-%m-%d_%H:%M:%S'))
         time.sleep(pause_hours*3600)

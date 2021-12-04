@@ -1,3 +1,5 @@
+#coding=utf-8
+
 import json
 
 
@@ -34,7 +36,6 @@ def openInfosFile() -> None:#if no, creat one
         exit()
     return None
 
-# def save_HTML_page(content,name) -> None: open(os.getcwd()+'\\html-download\\'+name+'.htm',mode='w+',encoding='utf-8').write(content)
 def save_HTML_page(content,name) -> None:
     with open('./html-download/'+name+'.htm',mode='w+',encoding='utf-8') as f:
         f.write(content)
@@ -50,8 +51,3 @@ def replace_illegal_char(ipt) -> str:
     ipt = ipt.replace('*','[半角星号]')
     ipt = ipt.replace(':','[半角冒号]')
     return ipt
-
-# def write_file(path,content):
-#     with open(file=path,mode='w+',encoding='utf-8') as f:
-#         f.write(content)
-#     return None

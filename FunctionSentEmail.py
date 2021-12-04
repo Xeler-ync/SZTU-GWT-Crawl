@@ -28,13 +28,6 @@ def create_email_content_from_new_GWT_announcement(AnnouncementInfo,start_time):
     content += '完整的免责声明见程序发布页或向邮件发送者索取'
     return content
 
-# def separate_new_announcement(AnnouncementInfo.attachment_file_list):
-    # new_announcement = []
-    # for i in range(len(AnnouncementInfo.attachment_file_list)):
-    #     if AnnouncementInfo.attachment_file_list[i][3].find('r') == -1:
-    #         new_announcement.append(AnnouncementInfo.attachment_file_list[i])
-    # return new_announcement
-
 def mark_sent_announcement(AnnouncementInfo) -> None:
     with open(file=AnnouncementInfo.cache_file_path,mode='r',encoding='utf-8') as gpc:
         previous_code_list = gpc.readlines()
@@ -44,7 +37,7 @@ def mark_sent_announcement(AnnouncementInfo) -> None:
                     AnnouncementInfo.index_list[i] += 'r'
     return None
 
-def send_GWT_message(AnnouncementInfo): # ,all_HTML_name,an1nouncement_info_list):
+def send_GWT_message(AnnouncementInfo):
     json_sending_data = openInfosFile()
     #set sever
     email_sever = smtplib.SMTP_SSL(json_sending_data["smtpserver"],json_sending_data["smtpport"])

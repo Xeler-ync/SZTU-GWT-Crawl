@@ -1,3 +1,5 @@
+#coding=utf-8
+
 class HeadersMoudle:
     def __init__(self,cookie) -> None:
         self.headers={

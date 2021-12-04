@@ -1,3 +1,4 @@
+#coding=utf-8
 class SubPageInfo:
 
     def __init__(self,
@@ -8,7 +9,7 @@ class SubPageInfo:
         date_list:list,
         cache_file_path:str,
         mode:str
-        ) -> None: # academy, index, title, hasAttachment, date
+        ) -> None:
         self.academy_list = academy_list
         self.index_list = index_list
         self.title_list = title_list
@@ -28,11 +29,6 @@ class SubPageInfo:
         for i in self.index_list:
             if i[-1] == 'r':
                 pop_value_list.append(i)
-                # self.academy_list.pop[i]
-                # self.index_list.pop[i]
-                # self.title_list.pop[i]
-                # self.has_attachment_list.pop[i]
-                # self.date_list.pop[i]
         for i in pop_value_list:
             self.academy_list.pop(self.index_list.index(i))
             self.title_list.pop(self.index_list.index(i))
@@ -98,4 +94,3 @@ class SubPageInfo:
             self.content += '\n'
             self.content += '本程序所提供的信息，仅供参考之用。所有数据来自深圳技术大学内部网，版权归深圳技术大学及相关发布人所有。\n'
             self.content += '完整的免责声明见程序发布页或向邮件发送者索取'
-        # return self.content

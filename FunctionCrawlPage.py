@@ -1,4 +1,5 @@
-from email.header import Header
+#coding=utf-8
+
 from CrawlLibs import *
 
 from ClassHeaders import *
@@ -6,18 +7,14 @@ from ClassSubPageInfo import *
 
 
 def download_web_file(SubPageInfo:SubPageInfo,headers:dict) -> None:
-    # all_file_name = []
-    # SubPageInfo.attachment_file_list = []
     from FunctionFileControl import replace_illegal_char
     from FunctionFileControl import save_HTML_page
     for i in range(len(SubPageInfo.academy_list)):
         page_index = re.findall('/([0-9]+)',SubPageInfo.index_list[i],re.S)[0]
         HTML_file_name = replace_illegal_char(page_index+'_'+SubPageInfo.date_list[i]+'_'+SubPageInfo.title_list[i])
         html = etree.HTML(get_HTML_page('http://nbw.sztu.edu.cn/info/'+SubPageInfo.index_list[i]+'.htm',headers))
-        # xpath_finder = '//html/body/div/form/div/ul/li'
         xpath_finder = '//div/form/div/ul/li'
         attachment_link = []
-        attachment_divs_list = html.xpath(xpath_finder)
         attachment_divs_num = len(html.xpath(xpath_finder))
         if attachment_divs_num>0:
             for l in range(0,attachment_divs_num):
@@ -32,7 +29,7 @@ def download_web_file(SubPageInfo:SubPageInfo,headers:dict) -> None:
         save_HTML_page(etree.tostring(html).decode('utf-8'),HTML_file_name)
         SubPageInfo.add_HTML_file(HTML_file_name)
     headers['Referer'] = 'http://nbw.sztu.edu.cn/'
-    return None # all_file_name,SubPageInfo.attachment_file_list
+    return None
 
 def get_HTML_page(url:str,headers:dict):
     respond = requests.get(url=url,headers=headers)
