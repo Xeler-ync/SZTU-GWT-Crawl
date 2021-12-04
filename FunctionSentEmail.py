@@ -6,7 +6,7 @@ from SentEmailLibs import *
 from FunctionFileControl import openInfosFile
 
 
-def create_email_content_from_new_announcement(AnnouncementInfo,start_time):
+def create_email_content_from_new_GWT_announcement(AnnouncementInfo,start_time):
     content = 'There is(are) '+str(len(AnnouncementInfo.academy_list))+' new announcement(s) now!\n'
     content += 'The message was generated at '+start_time+'\n'
     content += '\n'
@@ -36,7 +36,7 @@ def create_email_content_from_new_announcement(AnnouncementInfo,start_time):
     # return new_announcement
 
 def mark_sent_announcement(AnnouncementInfo) -> None:
-    with open(file='./GWT.previous.cache.txt',mode='r',encoding='utf-8') as gpc:
+    with open(file=AnnouncementInfo.cache_file_path,mode='r',encoding='utf-8') as gpc:
         previous_code_list = gpc.readlines()
         for i in range(len(AnnouncementInfo.index_list)):
             for j in range(len(previous_code_list)):
@@ -44,7 +44,7 @@ def mark_sent_announcement(AnnouncementInfo) -> None:
                     AnnouncementInfo.index_list[i] += 'r'
     return None
 
-def send_GWT_message(content,AnnouncementInfo): # ,all_HTML_name,an1nouncement_info_list):
+def send_GWT_message(AnnouncementInfo): # ,all_HTML_name,an1nouncement_info_list):
     json_sending_data = openInfosFile()
     #set sever
     email_sever = smtplib.SMTP_SSL(json_sending_data["smtpserver"],json_sending_data["smtpport"])
@@ -52,9 +52,9 @@ def send_GWT_message(content,AnnouncementInfo): # ,all_HTML_name,an1nouncement_i
     message = MIMEMultipart()   #define message
     message['from'] = formataddr([json_sending_data["fromname"],json_sending_data["fromaddress"]])#sender
     if len(AnnouncementInfo.academy_list) == 0:
-        message['Subject'] = Header('No new GWT announcement', 'utf-8')  #email title
+        message['Subject'] = Header('No new '+AnnouncementInfo.mode+' announcement', 'utf-8')  #email title
     else:
-        message['Subject'] = Header(json_sending_data["title"], 'utf-8')  #email title
+        message['Subject'] = Header('New '+AnnouncementInfo.mode+' announcement', 'utf-8')  #email title
     for i in range(len(AnnouncementInfo.HTML_file_list)):
         HTMLFile = MIMEApplication(open('./html-download/{}.htm'.format(AnnouncementInfo.HTML_file_list[i]),mode='r',encoding='utf-8').read())
         HTMLFile.add_header('Content-Disposition', 'attachment', filename=AnnouncementInfo.HTML_file_list[i]+'.htm')
@@ -63,8 +63,8 @@ def send_GWT_message(content,AnnouncementInfo): # ,all_HTML_name,an1nouncement_i
         attachmentFile = MIMEApplication(open('./html-download/'+AnnouncementInfo.attachment_file_list[i],'rb').read())
         attachmentFile.add_header('Content-Disposition', 'attachment', filename=AnnouncementInfo.attachment_file_list[i])
         message.attach(attachmentFile)
-    content = content.replace('datetime.datetime.now().strftime("%y-%m-%d_%H:%M:%S")',datetime.datetime.now().strftime("%y-%m-%d_%H:%M:%S"))
-    message.attach(MIMEText(content, 'plain', 'utf-8'))
+    AnnouncementInfo.content = AnnouncementInfo.content.replace('datetime.datetime.now().strftime("%y-%m-%d_%H:%M:%S")',datetime.datetime.now().strftime("%y-%m-%d_%H:%M:%S"))
+    message.attach(MIMEText(AnnouncementInfo.content, 'plain', 'utf-8'))
     for i in range(len(json_sending_data["to"])):
         if len(AnnouncementInfo.academy_list) == 0 and not json_sending_data['to'][i]["isadmin"]:
             print('No new announcement, ignore '+json_sending_data["to"][i]["name"]+' '+json_sending_data["to"][i]["address"])

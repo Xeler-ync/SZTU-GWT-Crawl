@@ -1,4 +1,3 @@
-import os
 import json
 
 
@@ -8,15 +7,15 @@ def save_recent_GWT_code(index_list) -> None:
     write_GWT_previous_cache(index_list)
     return None
 
-def write_GWT_previous_cache(numList) -> None: open(file=os.getcwd()+'/GWT.previous.cache.txt',mode='w+',encoding='utf-8').writelines(numList)
+def write_GWT_previous_cache(num_list) -> None: open(file='./GWT.previous.cache.txt',mode='w+',encoding='utf-8').writelines(f'{i}\n' for i in num_list)
 
 def openInfosFile() -> None:#if no, creat one
     try:
-        with open(file=os.getcwd()+'/sender.email.acc.pss.json',mode='r',encoding='utf-8') as sea:
+        with open(file='./sender.email.acc.pss.json',mode='r',encoding='utf-8') as sea:
             jsonData=json.load(sea)
             return jsonData
     except OSError:
-        with open(file=os.getcwd()+'/sender.email.acc.pss.json',mode='w+',encoding='utf-8') as sea:
+        with open(file='./sender.email.acc.pss.json',mode='w+',encoding='utf-8') as sea:
             sea.writelines('{')
             sea.writelines('    "fromaddress": "",\n')
             sea.writelines('    "fromname": "",\n')
@@ -37,7 +36,7 @@ def openInfosFile() -> None:#if no, creat one
 
 # def save_HTML_page(content,name) -> None: open(os.getcwd()+'\\html-download\\'+name+'.htm',mode='w+',encoding='utf-8').write(content)
 def save_HTML_page(content,name) -> None:
-    with open(os.getcwd()+'/html-download/'+name+'.htm',mode='w+',encoding='utf-8') as f:
+    with open('./html-download/'+name+'.htm',mode='w+',encoding='utf-8') as f:
         f.write(content)
 
 def replace_illegal_char(ipt) -> str:
