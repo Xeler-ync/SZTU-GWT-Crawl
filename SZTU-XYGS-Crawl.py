@@ -48,3 +48,5 @@ if __name__ == '__main__':
         download_web_file(PublicityPage,Headers.headers)
         print(str(len(PublicityPage.academy_list))+' new announcement(s)')
         send_GWT_message(PublicityPage)
+        print('Sleep from '+datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')+' to '+(datetime.datetime.now()+datetime.timedelta(hours=pause_hours)).strftime('%Y-%m-%d_%H:%M:%S'))
+        time.sleep(pause_hours*3600)
