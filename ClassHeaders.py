@@ -1,16 +1,16 @@
 #coding=utf-8
 
 class HeadersMoudle:
-    def __init__(self,cookie) -> None:
+    def __init__(self,cookie,referer='http://nbw.sztu.edu.cn/',host='nbw.sztu.edu.cn') -> None:
         self.headers={
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'Accept-Encoding': 'gzip, deflate',
+            'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Language': 'zh-CN,zh;q=0.9',
             'Connection': 'keep-alive',
             'Cookie': cookie,
-            'Host': 'nbw.sztu.edu.cn',
+            'Host': host,
             'Upgrade-Insecure-Requests': '1',
-            'Referer': 'http://nbw.sztu.edu.cn/',
+            'Referer': referer,
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36',
         }
 

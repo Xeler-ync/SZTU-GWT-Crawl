@@ -94,3 +94,23 @@ class SubPageInfo:
             self.content += '\n'
             self.content += '本程序所提供的信息，仅供参考之用。所有数据来自深圳技术大学内部网，版权归深圳技术大学及相关发布人所有。\n'
             self.content += '完整的免责声明见程序发布页或向邮件发送者索取'
+        elif self.mode == 'XYXW':
+            self.content = 'There is(are) '+str(len(self.academy_list))+' new new(s) now!\n'
+            self.content += 'The message was generated at '+start_time+'\n'
+            self.content += '\n'
+            for i in range(len(self.academy_list)):
+                self.content += '\n'
+                self.content += 'From: '+self.academy_list[i]+'\n'
+                self.content += 'Date: '+self.date_list[i]+'\n'
+                self.content += 'Tittle: '+self.title_list[i]+'\n'
+                self.content += 'Link: '+'http://nbw.sztu.edu.cn/info/'+self.index_list[i]+'.htm\n'
+                if self.has_attachment_list[i].find('1') == -1:
+                    self.content += 'Attachment: Flase\n'
+                else:
+                    self.content += 'Attachment: True\n'
+            self.content += '\n'
+            self.content += '\n'
+            self.content += 'The message was sent at '+'datetime.datetime.now().strftime("%y-%m-%d_%H:%M:%S")'+'\n'
+            self.content += '\n'
+            self.content += '本程序所提供的信息，仅供参考之用。所有数据来自深圳技术大学内部网，版权归深圳技术大学及相关发布人所有。\n'
+            self.content += '完整的免责声明见程序发布页或向邮件发送者索取'

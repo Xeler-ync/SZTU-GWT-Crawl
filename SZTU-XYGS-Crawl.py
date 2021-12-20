@@ -39,7 +39,7 @@ if __name__ == '__main__':
         start_time = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
         Headers = HeadersMoudle(cookie='')
         PublicityPage = crawlXYGSMainPage()
-        PublicityPage.academy_list = len(PublicityPage.academy_list) * ['校内公示 ']
+        PublicityPage.academy_list = len(PublicityPage.academy_list) * ['校内公示']
         mark_sent_announcement(PublicityPage)
         save_recent_page_code(PublicityPage.index_list[:],PublicityPage.cache_file_path)
         PublicityPage.remove_duplicate_page()
