@@ -11,14 +11,13 @@ from ClassHeaders import *
 from ClassSubPageInfo import *
 
 
-def get_total_page_from_first_page_HTML(html):
+def get_total_page_from_first_page_HTML(html:str) -> int:
     if html == '':
         html = get_GWT_page_HTML(1,0)
     total_page_finder='上页</span><span class="p_no_d">1</span><span class="p_no"><a href="\?totalpage=([0-9]+)\&PAGENUM=2\&urltype=tree.TreeTempUrl\&wbtreeid=[0-9]+"'
-    total_page = re.findall(total_page_finder,html,re.S)
-    return total_page[0]
+    return int(re.findall(total_page_finder,html,re.S)[0])
 
-def get_GWT_page_info(page,html,total_page):
+def get_GWT_page_info(page:int,html:str,total_page:int) -> SubPageInfo and int:
     if page == 0: # 提高鲁棒性
         return [['No Page 0']*5]
     if html == '': # 爬主页
@@ -28,7 +27,7 @@ def get_GWT_page_info(page,html,total_page):
     html = html.replace('\n','')
     html = html.replace('\r','')
     html = html.replace('<img src="images/fujian.png">','1') # 优化返回的内容
-    if page>int(total_page):
+    if page>total_page:
         return [['Page too big, max is '+str(total_page)]*5]
     list_finder = 'style="font-size: 14px;">(.*?)</a></div><div class="pull-left width04 txt-elise text-left" style="width:54%;"><a href="info/([0-9]+/[0-9]+).htm" title=".*?" target="_blank" style=".*?">(.*?)</a></div><div class="pull-left width05"  style="width:5%;height:32px;">(.*?)</div><div class="pull-right width06"  style="width:11%;">([0-9-]+)</div></li>'
     announcement_info_tuple = re.findall(list_finder,html,re.S) # ((academy, index, title, hasAttachment, date),*)
@@ -43,7 +42,7 @@ def get_GWT_page_info(page,html,total_page):
     )
     return AnnouncementInfo, total_page
 
-def get_GWT_page_HTML(page:int,total_page:int):
+def get_GWT_page_HTML(page:int,total_page:int) -> str:
     url = ''
     if page == 1 and total_page == 0:
         url = 'http://nbw.sztu.edu.cn/list.jsp?urltype=tree.TreeTempUrl&wbtreeid=1029'

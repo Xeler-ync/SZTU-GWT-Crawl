@@ -32,7 +32,7 @@ def download_web_file(SubPageInfo:SubPageInfo,headers:dict) -> None:
     headers['Referer'] = referer
     return None
 
-def get_HTML_page(url:str,headers:dict):
+def get_HTML_page(url:str,headers:dict) -> str:
     respond = requests.get(url=url,headers=headers,verify=False)
     if not headers['Cookie']:
         cookie_str = ''
@@ -42,9 +42,10 @@ def get_HTML_page(url:str,headers:dict):
     headers['Referer'] = url
     return respond.content.decode('utf-8')
 
-def download_attachment(url:str,file_name:str,headers:dict):
+def download_attachment(url:str,file_name:str,headers:dict) -> None:
     r = requests.get(url='http://nbw.sztu.edu.cn/'+url,stream=True,headers=headers)
     with open('./html-download/'+file_name,mode='wb+') as att:
         for chunk in r.iter_content(chunk_size=1024):
             if chunk:
                 att.write(chunk)
+    return None

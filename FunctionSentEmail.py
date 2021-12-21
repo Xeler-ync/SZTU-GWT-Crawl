@@ -37,7 +37,7 @@ def mark_sent_announcement(AnnouncementInfo) -> None:
                     AnnouncementInfo.index_list[i] += 'r'
     return None
 
-def send_GWT_message(AnnouncementInfo):
+def send_GWT_message(AnnouncementInfo) -> None:
     json_sending_data = openInfosFile()
     #set sever
     email_sever = smtplib.SMTP_SSL(json_sending_data["smtpserver"],json_sending_data["smtpport"])
@@ -69,3 +69,4 @@ def send_GWT_message(AnnouncementInfo):
         except Exception as error:
             print('Email sent failed --> ' + str(error))
     email_sever.quit()
+    return None
