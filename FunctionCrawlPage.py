@@ -9,6 +9,7 @@ from ClassSubPageInfo import *
 def download_web_file(SubPageInfo:SubPageInfo,headers:dict) -> None:
     from FunctionFileControl import replace_illegal_char
     from FunctionFileControl import save_HTML_page
+    referer = headers['Referer']
     for i in range(len(SubPageInfo.academy_list)):
         page_index = re.findall('/([0-9]+)',SubPageInfo.index_list[i],re.S)[0]
         HTML_file_name = replace_illegal_char(page_index+'_'+SubPageInfo.date_list[i]+'_'+SubPageInfo.title_list[i])
@@ -28,7 +29,7 @@ def download_web_file(SubPageInfo:SubPageInfo,headers:dict) -> None:
                 download_attachment(attachment_link[k],SubPageInfo.attachment_file_list[k],headers)
         save_HTML_page(etree.tostring(html).decode('utf-8'),HTML_file_name)
         SubPageInfo.add_HTML_file(HTML_file_name)
-    headers['Referer'] = 'http://nbw.sztu.edu.cn/'
+    headers['Referer'] = referer
     return None
 
 def get_HTML_page(url:str,headers:dict):
